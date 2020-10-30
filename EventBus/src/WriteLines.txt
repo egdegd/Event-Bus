@@ -1,0 +1,3 @@
+{"From":{"ID":0,"name":"A"},"To":{"ID":0,"name":"A"},"Text":"Hello"}
+{"From":{"ID":0,"name":"1"},"To":{"ID":0,"name":"1"},"Text":"0"}
+{"From":{"ID":1,"name":"Second"},"To":{"ID":0,"name":"First"},"Text":"Hello First"}
