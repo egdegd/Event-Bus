@@ -1,3 +1,4 @@
 EventBus/bin/*
 EventBus/obj/*
 .vs
+packages/*
