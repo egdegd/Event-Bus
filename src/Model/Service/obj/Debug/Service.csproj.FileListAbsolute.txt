@@ -1,0 +1,12 @@
+A:\Event-Bus\src\Model\Service\bin\Debug\Service.dll
+A:\Event-Bus\src\Model\Service\bin\Debug\Service.pdb
+A:\Event-Bus\src\Model\Service\obj\Debug\Service.csproj.CoreCompileInputs.cache
+A:\Event-Bus\src\Model\Service\obj\Debug\Service.dll
+A:\Event-Bus\src\Model\Service\obj\Debug\Service.pdb
+A:\Event-Bus\src\Model\Service\obj\Debug\Service.csprojAssemblyReference.cache
+A:\C#\Event-Bus\src\Model\Service\bin\Debug\Service.dll
+A:\C#\Event-Bus\src\Model\Service\bin\Debug\Service.pdb
+A:\C#\Event-Bus\src\Model\Service\obj\Debug\Service.csprojAssemblyReference.cache
+A:\C#\Event-Bus\src\Model\Service\obj\Debug\Service.csproj.CoreCompileInputs.cache
+A:\C#\Event-Bus\src\Model\Service\obj\Debug\Service.dll
+A:\C#\Event-Bus\src\Model\Service\obj\Debug\Service.pdb
