@@ -1,4 +1,4 @@
-EventBus/bin/*
-EventBus/obj/*
+bin/
+obj/
 .vs
-packages/*
+src/packages/*
