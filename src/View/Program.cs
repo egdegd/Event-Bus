@@ -5,6 +5,7 @@ using Newtonsoft.Json;
 
 using Model;
 using System.Threading.Tasks;
+using DataStorage.DataProviders;
 
 namespace View
 {
@@ -15,6 +16,9 @@ namespace View
         {
             ConsoleClient client = new ConsoleClient();
             client.Run();
+            //var res = MessageDataProvider.GetAllMessages();
+            //Console.WriteLine(res[0].Text);
+            //Console.ReadLine();
         }
     }
 }

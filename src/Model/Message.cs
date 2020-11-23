@@ -12,4 +12,16 @@ namespace Model
         public string To { get; set; }
         public string Text { get; set; }
     }
+    public class MessageDTO
+    {
+        public int Id { get; set; }
+
+        public string From { get; set; }
+
+        public string To { get; set; }
+
+        public string Text { get; set; }
+
+        public int IsSent { get; set; }
+    }
 }

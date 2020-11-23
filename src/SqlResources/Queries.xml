@@ -1,0 +1,13 @@
+﻿<?xml version="1.0" encoding="UTF-8" ?>
+<Root>
+	<Table Name="CUSTOM_COMMANDS">
+	</Table>
+	<Table Name="messages">
+		<Command Name="GetAllMessages">
+			select Id, [From], [To], [Text], IsSent from [dbo].[messages]
+		</Command>
+		<Command Name="GetMessageById">
+			select Id, [From], [To], [Text], IsSent from [dbo].[messages] where Id=@messageId
+		</Command>
+	</Table>
+</Root>
