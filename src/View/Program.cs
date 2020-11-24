@@ -16,8 +16,9 @@ namespace View
         {
             ConsoleClient client = new ConsoleClient();
             client.Run();
-            //var res = MessageDataProvider.GetAllMessages();
-            //Console.WriteLine(res[0].Text);
+
+            //var res = SubscriberDataProvider.GetSubscribers("eventC");
+            //Console.WriteLine(res.Count);
             //Console.ReadLine();
         }
     }

@@ -14,7 +14,7 @@ namespace Model
     }
     public class MessageDTO
     {
-        public int Id { get; set; }
+        public string Id { get; set; }
 
         public string From { get; set; }
 
@@ -23,5 +23,15 @@ namespace Model
         public string Text { get; set; }
 
         public int IsSent { get; set; }
+
+        public Message ToMessage()
+        {
+            return new Message
+            {
+                From = From,
+                To = To,
+                Text = Text
+            };
+        }
     }
 }

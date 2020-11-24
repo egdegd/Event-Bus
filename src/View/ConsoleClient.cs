@@ -22,10 +22,10 @@ namespace View
                 response = client.GetAsync("http://localhost:9001/api/serviceA/requestEvent").Result;
                 response = client.GetAsync("http://localhost:9002/api/serviceB/requestMsg").Result;
                 response = client.GetAsync("http://localhost:9002/api/serviceB/requestEvent").Result;
-                response = client.GetAsync("http://localhost:9003/api/serviceC/requestMsg").Result;
-                response = client.GetAsync("http://localhost:9003/api/serviceC/requestEvent").Result;
-                response = client.GetAsync("http://localhost:9004/api/serviceD/requestMsg").Result;
-                response = client.GetAsync("http://localhost:9004/api/serviceD/requestEvent").Result;
+                //response = client.GetAsync("http://localhost:9003/api/serviceC/requestMsg").Result;
+                //response = client.GetAsync("http://localhost:9003/api/serviceC/requestEvent").Result;
+                //response = client.GetAsync("http://localhost:9004/api/serviceD/requestMsg").Result;
+                //response = client.GetAsync("http://localhost:9004/api/serviceD/requestEvent").Result;
             }
         }
         static async void RequestMsgAsync()
@@ -52,6 +52,9 @@ namespace View
                     case "subscribe":
                         Subscribe();
                         break;
+                    case "unsubscribe":
+                        Unsubscribe();
+                        break;
                     case "publish":
                         Publish();
                         break;
@@ -68,6 +71,7 @@ namespace View
             Console.WriteLine("\thelp - show a list of commands on the screen");
             Console.WriteLine("\tsend - send message <text> from <senderName> to <receipientName>");
             Console.WriteLine("\tsubscribe - subscribe to event with type <eventType>");
+            Console.WriteLine("\tunsubscribe - unsubscribe from event with type <eventType>");
             Console.WriteLine("\tpublish - publish event with type <eventType> and <description>");
             Console.WriteLine("\texit - end program execution");
         }
@@ -96,6 +100,19 @@ namespace View
             string type = Console.ReadLine();
             var client = new HttpClient();
             string url = "http://localhost:" + localhost + "/api/" + name + "/subscribe?type=" + type;
+            var response = client.GetAsync(url).Result;
+            var result = response.Content.ReadAsStringAsync().Result;
+        }
+        public void Unsubscribe()
+        {
+            Console.WriteLine("Service name:");
+            string name = Console.ReadLine();
+            Console.WriteLine("Localhost:");
+            string localhost = Console.ReadLine();
+            Console.WriteLine("Event type:");
+            string type = Console.ReadLine();
+            var client = new HttpClient();
+            string url = "http://localhost:" + localhost + "/api/" + name + "/unsubscribe?type=" + type;
             var response = client.GetAsync(url).Result;
             var result = response.Content.ReadAsStringAsync().Result;
         }

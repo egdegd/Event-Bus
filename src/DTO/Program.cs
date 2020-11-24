@@ -20,28 +20,31 @@ namespace DTO
             {
                 connection.Open();
                 Console.WriteLine("Подключение открыто");
-                string sqlExpression = "select Id, [From], [To], [Text], IsSent from [dbo].[messages]";
-                //string sqlExpression = "insert into messages values (2, 'First', 'Second', 'Hello', 1)";
+                //string sqlExpression = "select Id, [From], [To], [Text], IsSent from [dbo].[messages]";
+                Guid id = Guid.NewGuid();
+                Console.WriteLine(id);
+                string sqlExpression = $"insert into messages values ('{id}', 'First', 'Second12', 'teretr', 0)";
                 SqlCommand command = new SqlCommand(sqlExpression, connection);
-                SqlDataReader reader = command.ExecuteReader();
-                if (reader.HasRows) // если есть данные
-                {
-                    // выводим названия столбцов
-                    Console.WriteLine("{0}\t{1}\t{2}\t{3}\t{4}", reader.GetName(0), reader.GetName(1), reader.GetName(2), reader.GetName(3), reader.GetName(4));
+                //SqlDataReader reader = command.ExecuteReader();
+                int number = command.ExecuteNonQuery();
+                //if (reader.HasRows) // если есть данные
+                //{
+                //    // выводим названия столбцов
+                //    Console.WriteLine("{0}\t{1}\t{2}\t{3}\t{4}", reader.GetName(0), reader.GetName(1), reader.GetName(2), reader.GetName(3), reader.GetName(4));
 
-                    while (reader.Read()) // построчно считываем данные
-                    {
-                        object id = reader["Id"];
-                        object from = reader.GetValue(1);
-                        object to = reader.GetValue(2);
-                        object text = reader.GetValue(3);
-                        object isSent = reader.GetValue(4);
-                        MessageDTOMapper mapper = new MessageDTOMapper();
-                        MessageDTO msg = mapper.ReadItem(reader);
+                //    while (reader.Read()) // построчно считываем данные
+                //    {
+                //        object id = reader["Id"];
+                //        object from = reader.GetValue(1);
+                //        object to = reader.GetValue(2);
+                //        object text = reader.GetValue(3);
+                //        object isSent = reader.GetValue(4);
+                //        MessageDTOMapper mapper = new MessageDTOMapper();
+                //        MessageDTO msg = mapper.ReadItem(reader);
 
-                        Console.WriteLine("{0} \t{1} \t{2} \t{3} \t{4}", id, from, to, text, isSent);
-                    }
-                }
+                //        Console.WriteLine("{0} \t{1} \t{2} \t{3} \t{4}", id, from, to, text, isSent);
+                //    }
+                //}
             }
             Console.WriteLine("Подключение закрыто...");
 

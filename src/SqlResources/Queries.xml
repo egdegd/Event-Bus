@@ -9,5 +9,47 @@
 		<Command Name="GetMessageById">
 			select Id, [From], [To], [Text], IsSent from [dbo].[messages] where Id=@messageId
 		</Command>
+		<Command Name="GetNewMessages">
+			select Id, [From], [To], [Text], IsSent from [dbo].[messages] where [To]=@recipient and IsSent = 0
+		</Command>
+		<Command Name="AddMessage">
+			insert into messages values (@id, @from, @to, @text, 0)
+		</Command>
+		<Command Name="UpdateIsSent">
+			update messages
+			set isSent = 1
+			where Id = @id
+		</Command>
+	</Table>
+	<Table Name="events">
+		<Command Name="GetAllEvents">
+			select Id, [Type], [Description], Organizer, Subscriber, IsSent from [dbo].[events]
+		</Command>
+		<Command Name="GetNewEvents">
+			select Id, [Type], [Description], Organizer, Subscriber, IsSent from [dbo].[events]
+			where Subscriber=@subscriber and IsSent = 0
+		</Command>
+		<Command Name="AddEvent">
+			insert into events values (@id, @type, @description, @organizer, @subscriber, 0)
+		</Command>
+		<Command Name="UpdateIsSent">
+			update events
+			set isSent = 1
+			where Id = @id
+		</Command>
+	</Table>
+	<Table Name="subscribers">
+		<Command Name="AddSubscribe">
+			if not exists (select 1 from subscribers where Subscriber = @subscriber and [Type] = @type)
+			begin
+				insert into subscribers values (@subscriber, @type)
+			end
+		</Command>
+		<Command Name="GetSubscribers">
+			select Subscriber from subscribers where [Type] = @type
+		</Command>
+		<Command Name="DeleteSubscribe">
+			delete subscribers where Subscriber = @subscriber and [Type] = @type
+		</Command>
 	</Table>
 </Root>

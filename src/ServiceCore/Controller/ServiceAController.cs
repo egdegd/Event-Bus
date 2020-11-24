@@ -39,7 +39,7 @@ namespace WebAPI.Core.Controller
             var client = new HttpClient();
             var response = client.GetAsync("http://localhost:9000/api/eventbus/sendmsg?name=serviceA").Result;
             var result = response.Content.ReadAsStringAsync().Result;
-            if (result != "\"no new messages\"")
+             if (result != "\"no new messages\"")
             {
                 Message actualResultFromGet = JsonConvert.DeserializeObject<Message>(result);
                 Console.WriteLine($"serviceA received message \"{actualResultFromGet.Text}\" from {actualResultFromGet.From}");
@@ -96,7 +96,25 @@ namespace WebAPI.Core.Controller
             var content = new StringContent(serializedObject, Encoding.UTF8, "application/json");
             var response = client.PostAsync("http://localhost:9000/api/eventbus/subscribe", content).Result;
             Console.WriteLine($"serviceA subscribed to the event {type}");
-            return Request.CreateResponse(HttpStatusCode.OK, "Event is published!", new MediaTypeHeaderValue("text/json"));
+            return Request.CreateResponse(HttpStatusCode.OK, "Subscribed", new MediaTypeHeaderValue("text/json"));
+        }
+
+        [Route("unsubscribe")]
+        [HttpGet]
+        public HttpResponseMessage Unubscribe(string type)
+        {
+            var client = new HttpClient();
+
+            Pair p = new Pair
+            {
+                First = "serviceA",
+                Second = type
+            };
+            var serializedObject = JsonConvert.SerializeObject(p);
+            var content = new StringContent(serializedObject, Encoding.UTF8, "application/json");
+            var response = client.PostAsync("http://localhost:9000/api/eventbus/unsubscribe", content).Result;
+            Console.WriteLine($"serviceA unsubscribed from the event {type}");
+            return Request.CreateResponse(HttpStatusCode.OK, "Unsubscribed", new MediaTypeHeaderValue("text/json"));
         }
     }
 }

@@ -42,10 +42,14 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="DataProviders\EventDataProvider.cs" />
     <Compile Include="DataProviders\MessageDataProvider.cs" />
+    <Compile Include="DataProviders\SubscriverDataProvider.cs" />
     <Compile Include="DBHelper.cs" />
+    <Compile Include="Mappers\EventDTOMapper.cs" />
     <Compile Include="Mappers\IMapper.cs" />
     <Compile Include="Mappers\MessageDTOMapper.cs" />
+    <Compile Include="Mappers\SubscriberDTOMapper.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>

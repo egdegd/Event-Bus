@@ -14,7 +14,7 @@ namespace DataStorage.Mappers
         {
             return new MessageDTO
             {
-                Id = (int)rd["Id"],
+                Id = (string)rd["Id"],
                 From = (string)rd["From"],
                 To = (string)rd["To"],
                 Text = (string)rd["Text"],

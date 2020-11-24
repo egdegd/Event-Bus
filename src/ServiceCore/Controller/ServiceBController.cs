@@ -96,7 +96,25 @@ namespace WebAPI.Core.Controller
             var content = new StringContent(serializedObject, Encoding.UTF8, "application/json");
             var response = client.PostAsync("http://localhost:9000/api/eventbus/subscribe", content).Result;
             Console.WriteLine($"serviceB subscribed to the event {type}");
-            return Request.CreateResponse(HttpStatusCode.OK, "Event is published!", new MediaTypeHeaderValue("text/json"));
+            return Request.CreateResponse(HttpStatusCode.OK, "Subscribed", new MediaTypeHeaderValue("text/json"));
+        }
+
+        [Route("unsubscribe")]
+        [HttpGet]
+        public HttpResponseMessage Unubscribe(string type)
+        {
+            var client = new HttpClient();
+
+            Pair p = new Pair
+            {
+                First = "serviceB",
+                Second = type
+            };
+            var serializedObject = JsonConvert.SerializeObject(p);
+            var content = new StringContent(serializedObject, Encoding.UTF8, "application/json");
+            var response = client.PostAsync("http://localhost:9000/api/eventbus/unsubscribe", content).Result;
+            Console.WriteLine($"serviceB unsubscribed from the event {type}");
+            return Request.CreateResponse(HttpStatusCode.OK, "Unsubscribed", new MediaTypeHeaderValue("text/json"));
         }
     }
 }
