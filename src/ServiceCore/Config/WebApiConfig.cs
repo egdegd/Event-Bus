@@ -1,7 +1,6 @@
 ﻿using Newtonsoft.Json;
 using Newtonsoft.Json.Serialization;
 using System.Web.Http;
-
 namespace WebAPI.Core.Config
 {
     public class WebApiConfig

@@ -4,6 +4,7 @@ using System.Configuration;
 using System.Data;
 using System.Data.SqlClient;
 using DataStorage.Mappers;
+using Log;
 using Model;
 
 namespace DataStorage
@@ -41,6 +42,7 @@ namespace DataStorage
             }
             catch (Exception ex)
             {
+                Logger.Error("DataBase", ex);
                 Console.WriteLine(ex.Message);
             }
 
@@ -77,6 +79,7 @@ namespace DataStorage
             }
             catch (Exception ex)
             {
+                Logger.Error("DataBase", ex);
                 Console.WriteLine(ex.Message);
             }
 

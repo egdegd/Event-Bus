@@ -6,6 +6,7 @@ using Newtonsoft.Json;
 using Model;
 using System.Threading.Tasks;
 using System.Threading;
+using Log;
 
 namespace View
 {
@@ -87,8 +88,18 @@ namespace View
             string toName = Console.ReadLine();
             var client = new HttpClient();
             string url = "http://localhost:" + localhost + "/api/" + fromName + "/sendmsg?recipient=" + toName + "&text=" + text;
-            var response = client.GetAsync(url).Result;
-            var result = response.Content.ReadAsStringAsync().Result;
+            Logger.Info("Client sent request: " + url);
+            try
+            {
+                var response = client.GetAsync(url).Result;
+                var result = response.Content.ReadAsStringAsync().Result;
+                Logger.Info("Client received response: " + result);
+            }
+            catch (Exception e)
+            {
+                Logger.Error("Request error", e);
+            }
+            
         }
         public void Subscribe()
         {
@@ -100,8 +111,18 @@ namespace View
             string type = Console.ReadLine();
             var client = new HttpClient();
             string url = "http://localhost:" + localhost + "/api/" + name + "/subscribe?type=" + type;
-            var response = client.GetAsync(url).Result;
-            var result = response.Content.ReadAsStringAsync().Result;
+            Logger.Info("Client sent request: " + url);
+            try
+            {
+                var response = client.GetAsync(url).Result;
+                var result = response.Content.ReadAsStringAsync().Result;
+                Logger.Info("Client received response: " + result);
+            }
+            catch (Exception e)
+            {
+                Logger.Error("Request error", e);
+            }
+            
         }
         public void Unsubscribe()
         {
@@ -113,8 +134,18 @@ namespace View
             string type = Console.ReadLine();
             var client = new HttpClient();
             string url = "http://localhost:" + localhost + "/api/" + name + "/unsubscribe?type=" + type;
-            var response = client.GetAsync(url).Result;
-            var result = response.Content.ReadAsStringAsync().Result;
+            Logger.Info("Client sent request: " + url);
+            try
+            {
+                var response = client.GetAsync(url).Result;
+                var result = response.Content.ReadAsStringAsync().Result;
+                Logger.Info("Client received response: " + result);
+            }
+            catch (Exception e)
+            {
+                Logger.Error("Request error", e);
+            }
+
         }
         public void Publish()
         {
@@ -128,8 +159,18 @@ namespace View
             string description = Console.ReadLine();
             var client = new HttpClient();
             string url = "http://localhost:" + localhost + "/api/" + name + "/publishevent?type=" + type + "&description=" + description;
-            var response = client.GetAsync(url).Result;
-            var result = response.Content.ReadAsStringAsync().Result;
+            Logger.Info("Client sent request: " + url);
+            try
+            {
+                var response = client.GetAsync(url).Result;
+                var result = response.Content.ReadAsStringAsync().Result;
+                Logger.Info("Client received response: " + result);
+            }
+            catch (Exception e)
+            {
+                                Logger.Error("Request error", e);
+
+            }
         }
     }
 }

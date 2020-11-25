@@ -1,14 +1,11 @@
 ﻿using Microsoft.Owin.Hosting;
 using System;
+using Log;
 
 namespace WebAPI.SelfHost
 {
     class Program
     {
-        // Test URL:
-        // http://localhost:9000/api/accesstest/test
-        // http://localhost:9000/api/simplecheck/getitem?id=0
-        // http://localhost:9000/api/eventbus/sendmsg?id=0
         static void Main(string[] args)
         {
             Console.WriteLine("Choose localhost:");
