@@ -11,6 +11,7 @@ using Log;
 using System.IO;
 using System.Text.Json;
 using System.Text.Json.Serialization;
+using System.Threading;
 
 namespace WebAPI.Core.Controller
 {
@@ -19,6 +20,8 @@ namespace WebAPI.Core.Controller
     {
         static List<Message> messagesToWrite = new List<Message>();
         public int maxMessages = Convert.ToInt32(ConfigurationManager.AppSettings["MaxMessages"]);
+        static HashSet<string> files = new HashSet<string>();
+
         public void WriteMessages()
         {
             Guid filename = Guid.NewGuid();
@@ -36,6 +39,27 @@ namespace WebAPI.Core.Controller
                     messagesToWrite.Clear();
                 }
             }
+        }
+
+        [Route("watchdog")]
+        [HttpGet]
+        public void WatchDog()
+        {
+            string path = Environment.CurrentDirectory + @"\messages\";
+            string[] allfiles = Directory.GetFiles(path);
+            foreach(string file in allfiles)
+            {
+                if(!files.Contains(file))
+                {
+                    files.Add(file);
+                    Thread t = new Thread(() => SaveMessagesInDataBase(file));
+                    t.Start();
+                }
+            }
+        }
+        static void SaveMessagesInDataBase(string filename) 
+        {
+            //TODO save messages and delete file
         }
 
         [Route("sendmsg")]
