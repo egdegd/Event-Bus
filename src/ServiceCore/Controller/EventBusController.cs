@@ -2,18 +2,41 @@
 using System.Net.Http;
 using System.Net.Http.Headers;
 using System.Web.Http;
-
+using System.Configuration;
 using System.Collections.Generic;
 using Model;
 using System;
 using DataStorage.DataProviders;
 using Log;
+using System.IO;
+using System.Text.Json;
+using System.Text.Json.Serialization;
 
 namespace WebAPI.Core.Controller
 {
     [RoutePrefix("api/eventbus")]
     public class EventBusController : ApiController
     {
+        static List<Message> messagesToWrite = new List<Message>();
+        public int maxMessages = Convert.ToInt32(ConfigurationManager.AppSettings["MaxMessages"]);
+        public void WriteMessages()
+        {
+            Guid filename = Guid.NewGuid();
+            string path = Environment.CurrentDirectory + @"\messages\" + filename + @".txt";
+            if (!File.Exists(path))
+            {
+                using (StreamWriter sw = File.CreateText(path))
+                {
+                    foreach (Message msg in messagesToWrite)
+                    {
+                        string jsonString;
+                        jsonString = JsonSerializer.Serialize<Message>(msg);
+                        sw.WriteLine(jsonString);
+                    }
+                    messagesToWrite.Clear();
+                }
+            }
+        }
 
         [Route("sendmsg")]
         [HttpGet]
@@ -27,7 +50,7 @@ namespace WebAPI.Core.Controller
                     return Request.CreateResponse(HttpStatusCode.NotFound,
                         "no new messages", new MediaTypeHeaderValue("text/json"));
                 }
-                
+
                 Message msg = messages[0].ToMessage();
                 Console.WriteLine($"eventBus sent message from {msg.From} to {msg.To} with text: \"{msg.Text}\"");
                 var response = Request.CreateResponse<Message>(HttpStatusCode.Accepted, msg);
@@ -52,6 +75,11 @@ namespace WebAPI.Core.Controller
                     $"Given message is invalid", new MediaTypeHeaderValue("text/json"));
             try
             {
+                messagesToWrite.Add(msg);
+                if (messagesToWrite.Count >= maxMessages)
+                {
+                    WriteMessages();
+                }
                 MessageDataProvider.AddMessage(msg.From, msg.To, msg.Text);
                 Logger.Info($"eventBus added message from {msg.From} to {msg.To} with text: \"{msg.Text}\" in data base");
                 Console.WriteLine($"eventBus added message from {msg.From} to {msg.To} with text: \"{msg.Text}\" in broker");
