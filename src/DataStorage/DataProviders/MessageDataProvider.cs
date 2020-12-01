@@ -40,6 +40,15 @@ namespace DataStorage.DataProviders
                 sqlQuery, param1, param2, param3, param4);
             return result;
         }
+        public static IList<MessageDTO> AddMessages(string messages)
+        {
+            string sqlQuery = XmlStrings.GetString(Tables.Messages, "AddMessages");
+            sqlQuery += messages;
+            var result = DBHelper.GetData(
+                new MessageDTOMapper(),
+                sqlQuery);
+            return result;
+        }
         public static IList<MessageDTO> UpdateIsSent(string id)
         {
             string sqlQuery = XmlStrings.GetString(Tables.Messages, "UpdateIsSent");

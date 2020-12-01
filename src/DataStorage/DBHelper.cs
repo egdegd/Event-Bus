@@ -32,7 +32,6 @@ namespace DataStorage
                 SqlCommand command = new SqlCommand(queryString, connection);
 
                 command.Parameters.AddRange(args);
-
                 SqlDataReader reader = command.ExecuteReader();
                 while (reader.Read())
                 {

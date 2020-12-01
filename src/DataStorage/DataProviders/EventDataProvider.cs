@@ -41,6 +41,16 @@ namespace DataStorage.DataProviders
                 sqlQuery, param1, param2, param3, param4, param5);
             return result;
         }
+
+        public static IList<EventDTO> AddEvents(string events)
+        {
+            string sqlQuery = XmlStrings.GetString(Tables.Events, "AddEvents");
+            sqlQuery += events;
+            var result = DBHelper.GetData(
+                new EventDTOMapper(),
+                sqlQuery);
+            return result;
+        }
         public static IList<EventDTO> UpdateIsSent(string id)
         {
             string sqlQuery = XmlStrings.GetString(Tables.Events, "UpdateIsSent");

@@ -3,7 +3,8 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
-
+using System.Text.Json;
+using System.Text.Json.Serialization;
 namespace Model
 {
     public class Event
@@ -12,15 +13,9 @@ namespace Model
         public string Description { get; set; }
         public string Organizer { get; set; }
     }
-    public class EventDTO
+    public class EventDTO : Event
     {
         public string Id { get; set; }
-
-        public string Type { get; set; }
-
-        public string Description { get; set; }
-
-        public string Organizer { get; set; }
         public string Subscriber { get; set; }
         public int IsSent { get; set; }
 
@@ -34,5 +29,9 @@ namespace Model
             };
         }
 
+    }
+    public class EventToFile : Event
+    {
+        public string Subscriber { get; set; }
     }
 }

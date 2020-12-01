@@ -19,9 +19,13 @@ namespace WebAPI.Core.Controller
     public class EventBusController : ApiController
     {
         static List<Message> messagesToWrite = new List<Message>();
-        public int maxMessages = Convert.ToInt32(ConfigurationManager.AppSettings["MaxMessages"]);
-        static HashSet<string> files = new HashSet<string>();
-
+        static List<EventToFile> eventsToWrite = new List<EventToFile>();
+        public static int concurrencyLevel = Convert.ToInt32(ConfigurationManager.AppSettings["ConcurrencyLevel"]);
+        public static int maxNote = Convert.ToInt32(ConfigurationManager.AppSettings["MaxNote"]);
+        static HashSet<string> filesForMessages = new HashSet<string>();
+        static HashSet<string> filesForEvents = new HashSet<string>();
+        static int countOfThreads = 0;
+        static object locker = new object();
         public void WriteMessages()
         {
             Guid filename = Guid.NewGuid();
@@ -37,29 +41,141 @@ namespace WebAPI.Core.Controller
                         sw.WriteLine(jsonString);
                     }
                     messagesToWrite.Clear();
+                    Logger.Info($"eventBus wrote last {maxNote} messages in a file: {path}");
+                    Console.WriteLine($"eventBus wrote last {maxNote} messages in a file");
+
                 }
             }
         }
 
-        [Route("watchdog")]
-        [HttpGet]
-        public void WatchDog()
+        public void WriteEvents()
         {
-            string path = Environment.CurrentDirectory + @"\messages\";
-            string[] allfiles = Directory.GetFiles(path);
-            foreach(string file in allfiles)
+            Guid filename = Guid.NewGuid();
+            string path = Environment.CurrentDirectory + @"\events\" + filename + @".txt";
+            if (!File.Exists(path))
             {
-                if(!files.Contains(file))
+                using (StreamWriter sw = File.CreateText(path))
                 {
-                    files.Add(file);
-                    Thread t = new Thread(() => SaveMessagesInDataBase(file));
-                    t.Start();
+                    foreach (EventToFile evnt in eventsToWrite)
+                    {
+                        string jsonString;
+                        jsonString = JsonSerializer.Serialize<EventToFile>(evnt);
+                        sw.WriteLine(jsonString);
+                    }
+                    eventsToWrite.Clear();
+                    Logger.Info($"eventBus wrote last {maxNote} events in a file: {path}");
+                    Console.WriteLine($"eventBus wrote last {maxNote} events in a file");
                 }
             }
         }
-        static void SaveMessagesInDataBase(string filename) 
+
+        public static void MessagesWatchDog()
         {
-            //TODO save messages and delete file
+            string path = Environment.CurrentDirectory + @"\messages\";
+            while (true)
+            {
+                Thread.Sleep(1000);
+                string[] allfiles = Directory.GetFiles(path);
+                foreach (string file in allfiles)
+                {
+                    if (!filesForMessages.Contains(file))
+                    {
+                        while (true)
+                        {
+                            if (countOfThreads < concurrencyLevel)
+                            {
+                                break;
+                            } 
+                        }
+                        filesForMessages.Add(file);
+                        Thread t = new Thread(() => SaveMessagesInDataBase(file));
+                        Logger.Info($"created new thread for file: {file}");
+                        t.Start();
+                    }
+                }
+            }
+            
+        }
+
+        public static void EventsWatchDog()
+        {
+            string path = Environment.CurrentDirectory + @"\events\";
+            while (true)
+            {
+                Thread.Sleep(1000);
+                string[] allfiles = Directory.GetFiles(path);
+                foreach (string file in allfiles)
+                {
+                    if (!filesForEvents.Contains(file))
+                    {
+                        while (true)
+                        {
+                            if (countOfThreads < concurrencyLevel)
+                            {
+                                break;
+                            }
+                        }
+                        filesForEvents.Add(file);
+                        Thread t = new Thread(() => SaveEventsInDataBase(file));
+                        Logger.Info($"created new thread for file: {file}");
+                        t.Start();
+                    }
+                }
+            }
+
+        }
+        public static void SaveMessagesInDataBase(string filename) 
+        {
+            lock (locker)
+            {
+                countOfThreads += 1;
+            }
+            //Random r = new Random();
+            //int rInt = r.Next(1000, 10000);
+            //Thread.Sleep(rInt);
+            string[] lines = File.ReadAllLines(filename);
+            string msgsToDB = "";
+            foreach (string s in lines)
+            {
+                Message msg = JsonSerializer.Deserialize<Message>(s);
+                msgsToDB += $"('{Guid.NewGuid()}', '{msg.From}', '{msg.To}', '{msg.Text}', 0), ";
+            }
+            msgsToDB = msgsToDB.Remove(msgsToDB.Length - 2);
+            MessageDataProvider.AddMessages(msgsToDB);
+            Logger.Info($"eventBus added last {maxNote} messages in data base");
+            Console.WriteLine($"eventBus added last {maxNote} messages in data base");
+            File.Delete(filename);
+            Logger.Info($"deleted file: {filename}");
+            lock (locker)
+            {
+                countOfThreads -= 1;
+            }
+        }
+
+        public static void SaveEventsInDataBase(string filename)
+        {
+            lock (locker)
+            {
+                countOfThreads += 1;
+            }
+            string[] lines = File.ReadAllLines(filename);
+            string eventsToDB = "";
+            foreach (string s in lines)
+            {
+                Console.WriteLine(s);
+                EventToFile e = JsonSerializer.Deserialize<EventToFile>(s);
+                eventsToDB += $"('{Guid.NewGuid()}', '{e.Type}', '{e.Description}', '{e.Organizer}', '{e.Subscriber}', 0), ";
+            }
+            eventsToDB = eventsToDB.Remove(eventsToDB.Length - 2);
+            EventDataProvider.AddEvents(eventsToDB);
+            Logger.Info($"eventBus added last {maxNote} events in data base");
+            Console.WriteLine($"eventBus added last {maxNote} events in data base");
+            File.Delete(filename);
+            Logger.Info($"deleted file: {filename}");
+            lock (locker)
+            {
+                countOfThreads -= 1;
+            }
         }
 
         [Route("sendmsg")]
@@ -100,14 +216,12 @@ namespace WebAPI.Core.Controller
             try
             {
                 messagesToWrite.Add(msg);
-                if (messagesToWrite.Count >= maxMessages)
+                Logger.Info($"eventBus added message from {msg.From} to {msg.To} with text: \"{msg.Text}\" in preliminary list");
+                Console.WriteLine($"eventBus added message from {msg.From} to {msg.To} with text: \"{msg.Text}\" in preliminary list");
+                if (messagesToWrite.Count >= maxNote)
                 {
                     WriteMessages();
                 }
-                MessageDataProvider.AddMessage(msg.From, msg.To, msg.Text);
-                Logger.Info($"eventBus added message from {msg.From} to {msg.To} with text: \"{msg.Text}\" in data base");
-                Console.WriteLine($"eventBus added message from {msg.From} to {msg.To} with text: \"{msg.Text}\" in broker");
-
                 return Request.CreateResponse(HttpStatusCode.OK, "Message added successfully", new MediaTypeHeaderValue("text/json"));
             }
             catch (Exception e)
@@ -116,6 +230,46 @@ namespace WebAPI.Core.Controller
                 throw;
             }
            
+        }
+
+        [Route("publish")]
+        [HttpPost]
+        public HttpResponseMessage Publish([FromBody] Event e)
+        {
+            if (e == null)
+                return Request.CreateResponse(HttpStatusCode.InternalServerError,
+                    $"Given event is invalid", new MediaTypeHeaderValue("text/json"));
+            try
+            {
+                string type = e.Type;
+                var subscribers = SubscriberDataProvider.GetSubscribers(type);
+                foreach (string subscriber in subscribers)
+                {
+                    EventToFile etf = new EventToFile
+                    {
+                        Type = e.Type,
+                        Description = e.Description,
+                        Organizer = e.Organizer,
+                        Subscriber = subscriber
+                    };
+
+                    eventsToWrite.Add(etf);
+                    Logger.Info($"eventBus added event from {e.Organizer} with description: \"{e.Description}\" in preliminary list");
+                    Console.WriteLine($"eventBus added event from {e.Organizer} with description: \"{e.Description}\" in preliminary list");
+                    if (eventsToWrite.Count >= maxNote)
+                    {
+                        WriteEvents();
+                    }
+
+                }
+                return Request.CreateResponse(HttpStatusCode.OK, "Event added successfully!", new MediaTypeHeaderValue("text/json"));
+            }
+            catch (Exception exc)
+            {
+                Logger.Error("EventBus error", exc);
+                throw;
+            }
+
         }
 
         [Route("subscribe")]
@@ -159,32 +313,6 @@ namespace WebAPI.Core.Controller
             }
         }
 
-        [Route("publish")]
-        [HttpPost]
-        public HttpResponseMessage Publish([FromBody] Event e)
-        {
-            if (e == null)
-                return Request.CreateResponse(HttpStatusCode.InternalServerError,
-                    $"Given event is invalid", new MediaTypeHeaderValue("text/json"));
-            try
-            {
-                string type = e.Type;
-                var subscribers = SubscriberDataProvider.GetSubscribers(type);
-                foreach (string subscriber in subscribers)
-                {
-                    EventDataProvider.AddEvent(type, e.Description, e.Organizer, subscriber);
-                }
-                Logger.Info($"eventBus added event from {e.Organizer} with description: \"{e.Description}\" in broker");
-                Console.WriteLine($"eventBus added event from {e.Organizer} with description: \"{e.Description}\" in broker");
-                return Request.CreateResponse(HttpStatusCode.OK, "Event added successfully!", new MediaTypeHeaderValue("text/json"));
-            }
-            catch (Exception exc)
-            {
-                Logger.Error("EventBus error", exc);
-                throw;
-            }
-            
-        }
 
         [Route("sendevent")]
         [HttpGet]

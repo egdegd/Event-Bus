@@ -15,6 +15,9 @@
 		<Command Name="AddMessage">
 			insert into messages values (@id, @from, @to, @text, 0)
 		</Command>
+		<Command Name="AddMessages">
+			insert into messages values 
+		</Command>
 		<Command Name="UpdateIsSent">
 			update messages
 			set isSent = 1
@@ -31,6 +34,9 @@
 		</Command>
 		<Command Name="AddEvent">
 			insert into events values (@id, @type, @description, @organizer, @subscriber, 0)
+		</Command>
+		<Command Name="AddEvents">
+			insert into events values 
 		</Command>
 		<Command Name="UpdateIsSent">
 			update events
