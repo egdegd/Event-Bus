@@ -18,6 +18,15 @@ namespace DataStorage.DataProviders
                 sqlQuery);
             return result;
         }
+        public static IList<MessageDTO> GetMessageById(string id)
+        {
+            string sqlQuery = XmlStrings.GetString(Tables.Messages, "GetMessageById");
+            SqlParameter param = new SqlParameter("@id", id);
+            var result = DBHelper.GetData(
+                new MessageDTOMapper(),
+                sqlQuery, param);
+            return result;
+        }
         public static IList<MessageDTO> GetNewMessages(string recipient)
         {
             string sqlQuery = XmlStrings.GetString(Tables.Messages, "GetNewMessages");
@@ -28,17 +37,18 @@ namespace DataStorage.DataProviders
             return result;
         }
 
-        public static IList<MessageDTO> AddMessage(string from, string to, string text)
+        public static string AddMessage(string from, string to, string text)
         {
             string sqlQuery = XmlStrings.GetString(Tables.Messages, "AddMessage");
-            SqlParameter param1 = new SqlParameter("@id", Guid.NewGuid());
+            string id = Guid.NewGuid().ToString();
+            SqlParameter param1 = new SqlParameter("@id", id);
             SqlParameter param2 = new SqlParameter("@from", from);
             SqlParameter param3 = new SqlParameter("@to", to);
             SqlParameter param4 = new SqlParameter("@text", text);
             var result = DBHelper.GetData(
                 new MessageDTOMapper(),
                 sqlQuery, param1, param2, param3, param4);
-            return result;
+            return id;
         }
         public static IList<MessageDTO> AddMessages(string messages)
         {

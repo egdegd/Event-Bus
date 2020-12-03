@@ -18,14 +18,14 @@ namespace WebAPI.Core.Controller
     [RoutePrefix("api/eventbus")]
     public class EventBusController : ApiController
     {
-        static List<Message> messagesToWrite = new List<Message>();
-        static List<EventToFile> eventsToWrite = new List<EventToFile>();
+        static readonly List<Message> messagesToWrite = new List<Message>();
+        static readonly List<EventToFile> eventsToWrite = new List<EventToFile>();
         public static int concurrencyLevel = Convert.ToInt32(ConfigurationManager.AppSettings["ConcurrencyLevel"]);
         public static int maxNote = Convert.ToInt32(ConfigurationManager.AppSettings["MaxNote"]);
-        static HashSet<string> filesForMessages = new HashSet<string>();
-        static HashSet<string> filesForEvents = new HashSet<string>();
+        static readonly HashSet<string> filesForMessages = new HashSet<string>();
+        static readonly HashSet<string> filesForEvents = new HashSet<string>();
         static int countOfThreads = 0;
-        static object locker = new object();
+        static readonly object locker = new object();
         public void WriteMessages()
         {
             Guid filename = Guid.NewGuid();
@@ -182,11 +182,38 @@ namespace WebAPI.Core.Controller
         [HttpGet]
         public HttpResponseMessage SendMsg(string name)
         {
+            HttpResponseMessage result = null;
+            while (true)
+            {
+                if (countOfThreads < concurrencyLevel)
+                {
+                    break;
+                }
+            }
+            Thread t = new Thread(() => { result = SendMsgThread(name); });
+            t.Start();
+            t.Join();
+            //TODO return good response
+            return result;
+        }
+
+        public HttpResponseMessage SendMsgThread(string name)
+        {
+            Thread.Sleep(10000);
+            lock (locker)
+            {
+                countOfThreads += 1;
+            }
             try
             {
                 var messages = MessageDataProvider.GetNewMessages(name);
                 if (messages.Count == 0)
                 {
+                    lock (locker)
+                    {
+                        countOfThreads -= 1;
+                    }
+                    //return "no new messages";
                     return Request.CreateResponse(HttpStatusCode.NotFound,
                         "no new messages", new MediaTypeHeaderValue("text/json"));
                 }
@@ -196,14 +223,22 @@ namespace WebAPI.Core.Controller
                 var response = Request.CreateResponse<Message>(HttpStatusCode.Accepted, msg);
                 MessageDataProvider.UpdateIsSent(messages[0].Id);
                 Logger.Info($"Status of the message {messages[0].Id} has been updated");
+                lock (locker)
+                {
+                    countOfThreads -= 1;
+                }
+                //return "OK";
                 return response;
             }
             catch (Exception e)
             {
                 Logger.Error("EventBus error", e);
+                lock (locker)
+                {
+                    countOfThreads -= 1;
+                }
                 throw;
             }
-            
         }
 
         [Route("addmsg")]

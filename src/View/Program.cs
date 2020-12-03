@@ -15,13 +15,9 @@ namespace View
         
         static void Main(string[] args)
         {
+            //MessageDataProvider.AddMessage("TT", "BB", "AA");
             ConsoleClient client = new ConsoleClient();
             client.Run();
-            //инициализация - требуется один раз в начале
-            //Logger.Info("huee");
-            //var res = SubscriberDataProvider.GetSubscribers("eventC");
-            //Console.WriteLine(res.Count);
-            //Console.ReadLine();
         }
     }
 }
