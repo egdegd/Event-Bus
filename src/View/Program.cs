@@ -15,7 +15,6 @@ namespace View
         
         static void Main(string[] args)
         {
-            //MessageDataProvider.AddMessage("TT", "BB", "AA");
             ConsoleClient client = new ConsoleClient();
             client.Run();
         }

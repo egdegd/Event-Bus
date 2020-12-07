@@ -18,6 +18,7 @@ namespace WebAPI.SelfHost
             //string name = "eventBus";
             if (name == "eventBus")
             {
+                EventBusController.init();
                 Thread t1 = new Thread(EventBusController.MessagesWatchDog);
                 t1.Start();
                 Thread t2 = new Thread(EventBusController.EventsWatchDog);

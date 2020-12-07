@@ -18,15 +18,28 @@ namespace WebAPI.Core.Controller
     [RoutePrefix("api/eventbus")]
     public class EventBusController : ApiController
     {
-        static readonly List<Message> messagesToWrite = new List<Message>();
-        static readonly List<EventToFile> eventsToWrite = new List<EventToFile>();
         public static int concurrencyLevel = Convert.ToInt32(ConfigurationManager.AppSettings["ConcurrencyLevel"]);
         public static int maxNote = Convert.ToInt32(ConfigurationManager.AppSettings["MaxNote"]);
         static readonly HashSet<string> filesForMessages = new HashSet<string>();
         static readonly HashSet<string> filesForEvents = new HashSet<string>();
         static int countOfThreads = 0;
-        static readonly object locker = new object();
-        public void WriteMessages()
+        static readonly List<Message>[] messagesToWrite = new List<Message>[concurrencyLevel];
+        static object[] msgLocks = new object[concurrencyLevel];
+        static readonly List<EventToFile>[] eventsToWrite = new List<EventToFile>[concurrencyLevel];
+        static object[] eventsLocks = new object[concurrencyLevel];
+
+
+        public static void init()
+        {
+            for (int i = 0; i < concurrencyLevel; i++)
+            {
+                msgLocks[i] = new object();
+                messagesToWrite[i] = new List<Message>();
+                eventsLocks[i] = new object();
+                eventsToWrite[i] = new List<EventToFile>();
+            }
+        }
+        public void WriteMessages(int index)
         {
             Guid filename = Guid.NewGuid();
             string path = Environment.CurrentDirectory + @"\messages\" + filename + @".txt";
@@ -34,13 +47,16 @@ namespace WebAPI.Core.Controller
             {
                 using (StreamWriter sw = File.CreateText(path))
                 {
-                    foreach (Message msg in messagesToWrite)
-                    {
-                        string jsonString;
-                        jsonString = JsonSerializer.Serialize<Message>(msg);
-                        sw.WriteLine(jsonString);
-                    }
-                    messagesToWrite.Clear();
+                    //lock (locks[index])
+                    //{
+                        foreach (Message msg in messagesToWrite[index])
+                        {
+                            string jsonString;
+                            jsonString = JsonSerializer.Serialize<Message>(msg);
+                            sw.WriteLine(jsonString);
+                        }
+                        messagesToWrite[index].Clear();
+                    //}
                     Logger.Info($"eventBus wrote last {maxNote} messages in a file: {path}");
                     Console.WriteLine($"eventBus wrote last {maxNote} messages in a file");
 
@@ -48,7 +64,7 @@ namespace WebAPI.Core.Controller
             }
         }
 
-        public void WriteEvents()
+        public void WriteEvents(int index)
         {
             Guid filename = Guid.NewGuid();
             string path = Environment.CurrentDirectory + @"\events\" + filename + @".txt";
@@ -56,13 +72,13 @@ namespace WebAPI.Core.Controller
             {
                 using (StreamWriter sw = File.CreateText(path))
                 {
-                    foreach (EventToFile evnt in eventsToWrite)
+                    foreach (EventToFile evnt in eventsToWrite[index])
                     {
                         string jsonString;
                         jsonString = JsonSerializer.Serialize<EventToFile>(evnt);
                         sw.WriteLine(jsonString);
                     }
-                    eventsToWrite.Clear();
+                    eventsToWrite[index].Clear();
                     Logger.Info($"eventBus wrote last {maxNote} events in a file: {path}");
                     Console.WriteLine($"eventBus wrote last {maxNote} events in a file");
                 }
@@ -80,13 +96,9 @@ namespace WebAPI.Core.Controller
                 {
                     if (!filesForMessages.Contains(file))
                     {
-                        while (true)
-                        {
-                            if (countOfThreads < concurrencyLevel)
-                            {
-                                break;
-                            } 
-                        }
+                        SpinWait spinWait = new SpinWait();
+                        while (Interlocked.CompareExchange(ref countOfThreads, concurrencyLevel, concurrencyLevel) >= concurrencyLevel)
+                            spinWait.SpinOnce();
                         filesForMessages.Add(file);
                         Thread t = new Thread(() => SaveMessagesInDataBase(file));
                         Logger.Info($"created new thread for file: {file}");
@@ -108,13 +120,9 @@ namespace WebAPI.Core.Controller
                 {
                     if (!filesForEvents.Contains(file))
                     {
-                        while (true)
-                        {
-                            if (countOfThreads < concurrencyLevel)
-                            {
-                                break;
-                            }
-                        }
+                        SpinWait spinWait = new SpinWait();
+                        while (Interlocked.CompareExchange(ref countOfThreads, concurrencyLevel, concurrencyLevel) >= concurrencyLevel)
+                            spinWait.SpinOnce();
                         filesForEvents.Add(file);
                         Thread t = new Thread(() => SaveEventsInDataBase(file));
                         Logger.Info($"created new thread for file: {file}");
@@ -126,10 +134,7 @@ namespace WebAPI.Core.Controller
         }
         public static void SaveMessagesInDataBase(string filename) 
         {
-            lock (locker)
-            {
-                countOfThreads += 1;
-            }
+            Interlocked.Increment(ref countOfThreads);
             //Random r = new Random();
             //int rInt = r.Next(1000, 10000);
             //Thread.Sleep(rInt);
@@ -140,42 +145,51 @@ namespace WebAPI.Core.Controller
                 Message msg = JsonSerializer.Deserialize<Message>(s);
                 msgsToDB += $"('{Guid.NewGuid()}', '{msg.From}', '{msg.To}', '{msg.Text}', 0), ";
             }
-            msgsToDB = msgsToDB.Remove(msgsToDB.Length - 2);
-            MessageDataProvider.AddMessages(msgsToDB);
-            Logger.Info($"eventBus added last {maxNote} messages in data base");
-            Console.WriteLine($"eventBus added last {maxNote} messages in data base");
-            File.Delete(filename);
-            Logger.Info($"deleted file: {filename}");
-            lock (locker)
+            try
             {
-                countOfThreads -= 1;
+                msgsToDB = msgsToDB.Remove(msgsToDB.Length - 2);
+                MessageDataProvider.AddMessages(msgsToDB);
+                Logger.Info($"eventBus added last {maxNote} messages in data base");
+                Console.WriteLine($"eventBus added last {maxNote} messages in data base");
+                File.Delete(filename);
+                Logger.Info($"deleted file: {filename}");
             }
+            catch (Exception e)
+            {
+                Logger.Error("EventBus error", e);
+                throw;
+            }
+            
+            Interlocked.Decrement(ref countOfThreads);
         }
 
         public static void SaveEventsInDataBase(string filename)
         {
-            lock (locker)
-            {
-                countOfThreads += 1;
-            }
+            Interlocked.Increment(ref countOfThreads);
             string[] lines = File.ReadAllLines(filename);
             string eventsToDB = "";
             foreach (string s in lines)
             {
-                Console.WriteLine(s);
                 EventToFile e = JsonSerializer.Deserialize<EventToFile>(s);
                 eventsToDB += $"('{Guid.NewGuid()}', '{e.Type}', '{e.Description}', '{e.Organizer}', '{e.Subscriber}', 0), ";
             }
-            eventsToDB = eventsToDB.Remove(eventsToDB.Length - 2);
-            EventDataProvider.AddEvents(eventsToDB);
-            Logger.Info($"eventBus added last {maxNote} events in data base");
-            Console.WriteLine($"eventBus added last {maxNote} events in data base");
-            File.Delete(filename);
-            Logger.Info($"deleted file: {filename}");
-            lock (locker)
+            try
             {
-                countOfThreads -= 1;
+                eventsToDB = eventsToDB.Remove(eventsToDB.Length - 2);
+                EventDataProvider.AddEvents(eventsToDB);
+                Logger.Info($"eventBus added last {maxNote} events in data base");
+                Console.WriteLine($"eventBus added last {maxNote} events in data base");
+                File.Delete(filename);
+                Logger.Info($"deleted file: {filename}");
             }
+            catch (Exception e)
+            {
+                Logger.Error("EventBus error", e);
+                throw;
+            }
+           
+            Interlocked.Decrement(ref countOfThreads);
+
         }
 
         [Route("sendmsg")]
@@ -183,13 +197,9 @@ namespace WebAPI.Core.Controller
         public HttpResponseMessage SendMsg(string name)
         {
             HttpResponseMessage result = null;
-            while (true)
-            {
-                if (countOfThreads < concurrencyLevel)
-                {
-                    break;
-                }
-            }
+            SpinWait spinWait = new SpinWait();
+            while (Interlocked.CompareExchange(ref countOfThreads, concurrencyLevel, concurrencyLevel) >= concurrencyLevel)
+                spinWait.SpinOnce();
             Thread t = new Thread(() => { result = SendMsgThread(name); });
             t.Start();
             t.Join();
@@ -199,20 +209,13 @@ namespace WebAPI.Core.Controller
 
         public HttpResponseMessage SendMsgThread(string name)
         {
-            Thread.Sleep(10000);
-            lock (locker)
-            {
-                countOfThreads += 1;
-            }
+            Interlocked.Increment(ref countOfThreads);
             try
             {
                 var messages = MessageDataProvider.GetNewMessages(name);
                 if (messages.Count == 0)
                 {
-                    lock (locker)
-                    {
-                        countOfThreads -= 1;
-                    }
+                    Interlocked.Decrement(ref countOfThreads);
                     //return "no new messages";
                     return Request.CreateResponse(HttpStatusCode.NotFound,
                         "no new messages", new MediaTypeHeaderValue("text/json"));
@@ -223,20 +226,13 @@ namespace WebAPI.Core.Controller
                 var response = Request.CreateResponse<Message>(HttpStatusCode.Accepted, msg);
                 MessageDataProvider.UpdateIsSent(messages[0].Id);
                 Logger.Info($"Status of the message {messages[0].Id} has been updated");
-                lock (locker)
-                {
-                    countOfThreads -= 1;
-                }
-                //return "OK";
+                Interlocked.Decrement(ref countOfThreads);
                 return response;
             }
             catch (Exception e)
             {
                 Logger.Error("EventBus error", e);
-                lock (locker)
-                {
-                    countOfThreads -= 1;
-                }
+                Interlocked.Decrement(ref countOfThreads);
                 throw;
             }
         }
@@ -248,23 +244,41 @@ namespace WebAPI.Core.Controller
             if (msg == null)
                 return Request.CreateResponse(HttpStatusCode.InternalServerError,
                     $"Given message is invalid", new MediaTypeHeaderValue("text/json"));
+            SpinWait spinWait = new SpinWait();
+            while (Interlocked.CompareExchange(ref countOfThreads, concurrencyLevel, concurrencyLevel) >= concurrencyLevel)
+                spinWait.SpinOnce();
+            Thread t = new Thread(() => AddMsgInList(msg));
+            Logger.Info($"created new thread for adding message from {msg.From} to {msg.To} with text: {msg.Text}");
+            t.Start();
+            return Request.CreateResponse(HttpStatusCode.OK, "Message added successfully", new MediaTypeHeaderValue("text/json"));
+
+        }
+
+        public void AddMsgInList(Message msg)
+        {
             try
             {
-                messagesToWrite.Add(msg);
-                Logger.Info($"eventBus added message from {msg.From} to {msg.To} with text: \"{msg.Text}\" in preliminary list");
-                Console.WriteLine($"eventBus added message from {msg.From} to {msg.To} with text: \"{msg.Text}\" in preliminary list");
-                if (messagesToWrite.Count >= maxNote)
+                Interlocked.Increment(ref countOfThreads);
+                Random r = new Random();
+                int index = r.Next(concurrencyLevel);
+                lock (msgLocks[index])
                 {
-                    WriteMessages();
+                    messagesToWrite[index].Add(msg);
+                    Logger.Info($"eventBus added message from {msg.From} to {msg.To} with text: \"{msg.Text}\" in preliminary list {index}");
+                    Console.WriteLine($"eventBus added message from {msg.From} to {msg.To} with text: \"{msg.Text}\" in preliminary list {index}");
+                    if (messagesToWrite[index].Count >= maxNote)
+                    {
+                        WriteMessages(index);
+                    }
                 }
-                return Request.CreateResponse(HttpStatusCode.OK, "Message added successfully", new MediaTypeHeaderValue("text/json"));
+                Interlocked.Decrement(ref countOfThreads);
             }
             catch (Exception e)
             {
                 Logger.Error("EventBus error", e);
                 throw;
             }
-           
+            
         }
 
         [Route("publish")]
@@ -274,6 +288,17 @@ namespace WebAPI.Core.Controller
             if (e == null)
                 return Request.CreateResponse(HttpStatusCode.InternalServerError,
                     $"Given event is invalid", new MediaTypeHeaderValue("text/json"));
+            SpinWait spinWait = new SpinWait();
+            while (Interlocked.CompareExchange(ref countOfThreads, concurrencyLevel, concurrencyLevel) >= concurrencyLevel)
+                spinWait.SpinOnce();
+            Thread t = new Thread(() => AddEventInList(e));
+            Logger.Info($"created new thread for adding event from {e.Organizer} with description: {e.Description}");
+            t.Start();
+            return Request.CreateResponse(HttpStatusCode.OK, "Event added successfully!", new MediaTypeHeaderValue("text/json"));
+        }
+
+        public void AddEventInList(Event e)
+        {
             try
             {
                 string type = e.Type;
@@ -287,17 +312,16 @@ namespace WebAPI.Core.Controller
                         Organizer = e.Organizer,
                         Subscriber = subscriber
                     };
-
-                    eventsToWrite.Add(etf);
-                    Logger.Info($"eventBus added event from {e.Organizer} with description: \"{e.Description}\" in preliminary list");
-                    Console.WriteLine($"eventBus added event from {e.Organizer} with description: \"{e.Description}\" in preliminary list");
-                    if (eventsToWrite.Count >= maxNote)
+                    Random r = new Random();
+                    int index = r.Next(concurrencyLevel);
+                    eventsToWrite[index].Add(etf);
+                    Logger.Info($"eventBus added event from {e.Organizer} with description: \"{e.Description}\" in preliminary list {index}");
+                    Console.WriteLine($"eventBus added event from {e.Organizer} with description: \"{e.Description}\" in preliminary list {index}");
+                    if (eventsToWrite[index].Count >= maxNote)
                     {
-                        WriteEvents();
+                        WriteEvents(index);
                     }
-
                 }
-                return Request.CreateResponse(HttpStatusCode.OK, "Event added successfully!", new MediaTypeHeaderValue("text/json"));
             }
             catch (Exception exc)
             {
