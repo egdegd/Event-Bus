@@ -19,10 +19,11 @@ namespace View
             while (true)
             {
                 Thread.Sleep(1000);
-                var response = client.GetAsync("http://localhost:9001/api/serviceA/requestMsg").Result;
-                response = client.GetAsync("http://localhost:9001/api/serviceA/requestEvent").Result;
-                response = client.GetAsync("http://localhost:9002/api/serviceB/requestMsg").Result;
-                response = client.GetAsync("http://localhost:9002/api/serviceB/requestEvent").Result;
+                
+                //var response = client.GetAsync("http://localhost:9001/api/serviceA/requestMsg").Result;
+                //response = client.GetAsync("http://localhost:9001/api/serviceA/requestEvent").Result;
+                //response = client.GetAsync("http://localhost:9002/api/serviceB/requestMsg").Result;
+                //response = client.GetAsync("http://localhost:9002/api/serviceB/requestEvent").Result;
                 //response = client.GetAsync("http://localhost:9003/api/serviceC/requestMsg").Result;
                 //response = client.GetAsync("http://localhost:9003/api/serviceC/requestEvent").Result;
                 //response = client.GetAsync("http://localhost:9004/api/serviceD/requestMsg").Result;
@@ -59,6 +60,9 @@ namespace View
                     case "publish":
                         Publish();
                         break;
+                    case "stress-testing":
+                        StressTestAsync();
+                        break;
                     case "exit":
                         endApp = true;
                         break;
@@ -74,6 +78,7 @@ namespace View
             Console.WriteLine("\tsubscribe - subscribe to event with type <eventType>");
             Console.WriteLine("\tunsubscribe - unsubscribe from event with type <eventType>");
             Console.WriteLine("\tpublish - publish event with type <eventType> and <description>");
+            Console.WriteLine("\tstress-testing - launch the service for testing");
             Console.WriteLine("\texit - end program execution");
         }
         public void SendMessage()
@@ -168,9 +173,26 @@ namespace View
             }
             catch (Exception e)
             {
-                                Logger.Error("Request error", e);
-
+                Logger.Error("Request error", e);
             }
+        }
+
+        static async void StressTestAsync()
+        {
+            Console.WriteLine("Localhost:");
+            string localhost = Console.ReadLine();
+            Console.WriteLine("messages per second:");
+            string messagesPerSecond = Console.ReadLine();
+            Console.WriteLine("count of seconds");
+            string countOfSeconds = Console.ReadLine();
+            await Task.Run(() => StressTest(localhost, messagesPerSecond, countOfSeconds));
+        }
+        static void StressTest(string localhost, string messagesPerSecond, string countOfSeconds)
+        {
+            var client = new HttpClient();
+            string url = "http://localhost:" + localhost + "/api/testService/sendmsg?messagesPerSecond=" + messagesPerSecond + "&countOfSeconds=" + countOfSeconds;
+            var response = client.GetAsync(url).Result;
+            var result = response.Content.ReadAsStringAsync().Result;
         }
     }
 }

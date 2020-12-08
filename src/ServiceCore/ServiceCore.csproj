@@ -88,6 +88,7 @@
     <Compile Include="Controller\ServiceBController.cs" />
     <Compile Include="Controller\ServiceCController.cs" />
     <Compile Include="Controller\ServiceDController.cs" />
+    <Compile Include="Controller\TestServiceController.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>

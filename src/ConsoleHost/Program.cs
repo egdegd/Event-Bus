@@ -3,6 +3,7 @@ using System;
 using Log;
 using WebAPI.Core.Controller;
 using System.Threading;
+using System.Net.Http;
 
 namespace WebAPI.SelfHost
 {
@@ -24,6 +25,7 @@ namespace WebAPI.SelfHost
                 Thread t2 = new Thread(EventBusController.EventsWatchDog);
                 t2.Start();
             }
+           
             string baseAddress = "http://localhost:" + localhost + "/";
             using (WebApp.Start<Startup>(url: baseAddress))
             {
