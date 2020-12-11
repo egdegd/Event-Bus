@@ -44,7 +44,7 @@
   <ItemGroup>
     <Compile Include="DataProviders\EventDataProvider.cs" />
     <Compile Include="DataProviders\MessageDataProvider.cs" />
-    <Compile Include="DataProviders\SubscriverDataProvider.cs" />
+    <Compile Include="DataProviders\SubscriberDataProvider.cs" />
     <Compile Include="DBHelper.cs" />
     <Compile Include="Mappers\EventDTOMapper.cs" />
     <Compile Include="Mappers\IMapper.cs" />

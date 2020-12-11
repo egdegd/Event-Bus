@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Data.SqlClient;
 using DataStorage.Mappers;
+using Log;
 using Model;
 using SqlHelper;
 
@@ -21,7 +22,7 @@ namespace DataStorage.DataProviders
         public static IList<MessageDTO> GetMessageById(string id)
         {
             string sqlQuery = XmlStrings.GetString(Tables.Messages, "GetMessageById");
-            SqlParameter param = new SqlParameter("@id", id);
+            SqlParameter param = new SqlParameter("@messageId", id);
             var result = DBHelper.GetData(
                 new MessageDTOMapper(),
                 sqlQuery, param);
@@ -67,6 +68,13 @@ namespace DataStorage.DataProviders
                 new MessageDTOMapper(),
                 sqlQuery, param);
             return result;
+        }
+        public static void DeleteTestMessages()
+        {
+            string sqlQuery = XmlStrings.GetString(Tables.Messages, "DeleteTestMessages");
+            DBHelper.GetData(
+            new MessageDTOMapper(),
+            sqlQuery);
         }
     }
 }

@@ -1,5 +1,7 @@
 using System.Net.Http;
 using System.Text;
+using System.Threading;
+using DataStorage.DataProviders;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Model;
 using Newtonsoft.Json;
@@ -17,7 +19,7 @@ namespace EventBusServer.Test
             {
                 From = "TestServiceA",
                 To = "TestServiceB",
-                Text = "Hello"
+                Text = "TestText"
             };
 
             var serializedObject = JsonConvert.SerializeObject(msg);
@@ -47,7 +49,7 @@ namespace EventBusServer.Test
             {
                 From = "TestServiceA",
                 To = "TestServiceB",
-                Text = "Hello"
+                Text = "TestText"
             };
 
             var serializedObject = JsonConvert.SerializeObject(msg);
@@ -68,7 +70,7 @@ namespace EventBusServer.Test
             {
                 From = "TestServiceA",
                 To = "TestServiceB",
-                Text = "Hello"
+                Text = "TestText"
             };
 
             var serializedObject = JsonConvert.SerializeObject(msg);
@@ -79,6 +81,15 @@ namespace EventBusServer.Test
                 var text = response.Content.ReadAsStringAsync().Result;
                 Assert.AreEqual(text, "\"Message added successfully\"");
             }
+        }
+
+        [TestCleanup]
+        public void TestCleanup()
+        {
+            Thread.Sleep(1000);
+            var client = new HttpClient();
+            client.GetAsync("http://localhost:9000/api/eventbus/deleteTestMessages");
+
         }
     }
 }

@@ -23,10 +23,17 @@
 			set isSent = 1
 			where Id = @id
 		</Command>
+		<Command Name="DeleteTestMessages">
+			delete from messages
+			where substring([From], 1, 4) = 'Test' and substring([To], 1, 4) = 'Test' and substring([Text], 1, 4) = 'Test'
+		</Command>
 	</Table>
 	<Table Name="events">
 		<Command Name="GetAllEvents">
 			select Id, [Type], [Description], Organizer, Subscriber, IsSent from [dbo].[events]
+		</Command>
+		<Command Name="GetEventById">
+			select Id, [Type], [Description], Organizer, Subscriber, IsSent from [dbo].[events]  where Id=@eventId
 		</Command>
 		<Command Name="GetNewEvents">
 			select Id, [Type], [Description], Organizer, Subscriber, IsSent from [dbo].[events]
@@ -43,6 +50,11 @@
 			set isSent = 1
 			where Id = @id
 		</Command>
+		<Command Name="DeleteTestEvents">
+			delete from events
+			where substring([Type], 1, 4) = 'Test' and substring([Description], 1, 4) = 'Test'
+			and substring(Organizer, 1, 4) = 'Test' and substring(Subscriber, 1, 4) = 'Test'
+		</Command>
 	</Table>
 	<Table Name="subscribers">
 		<Command Name="AddSubscribe">
@@ -56,6 +68,10 @@
 		</Command>
 		<Command Name="DeleteSubscribe">
 			delete subscribers where Subscriber = @subscriber and [Type] = @type
+		</Command>
+		<Command Name="DeleteTestSubscribers">
+			delete from subscribers
+			where substring(Subscriber, 1, 4) = 'Test' and substring([Type], 1, 4) = 'Test'
 		</Command>
 	</Table>
 </Root>

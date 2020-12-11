@@ -399,5 +399,12 @@ namespace WebAPI.Core.Controller
             }
             
         }
+
+        [Route("deleteTestMessages")]
+        [HttpGet]
+        public void DeleteTestMessages()
+        {
+            MessageDataProvider.DeleteTestMessages();
+        }
     }
 }

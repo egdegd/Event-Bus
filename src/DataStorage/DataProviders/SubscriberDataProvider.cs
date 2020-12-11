@@ -38,5 +38,12 @@ namespace DataStorage.DataProviders
                 sqlQuery, param1, param2);
             return result;
         }
+        public static void DeleteTestSubscribers()
+        {
+            string sqlQuery = XmlStrings.GetString(Tables.Subscribers, "DeleteTestSubscribers");
+            DBHelper.GetData(
+            new SubscriberDTOMapper(),
+            sqlQuery);
+        }
     }
 }

@@ -18,6 +18,16 @@ namespace DataStorage.DataProviders
                 sqlQuery);
             return result;
         }
+
+        public static IList<EventDTO> GetEventById(string id)
+        {
+            string sqlQuery = XmlStrings.GetString(Tables.Events, "GetEventById");
+            SqlParameter param = new SqlParameter("@eventId", id);
+            var result = DBHelper.GetData(
+                new EventDTOMapper(),
+                sqlQuery, param);
+            return result;
+        }
         public static IList<EventDTO> GetNewEvents(string subscriber)
         {
             string sqlQuery = XmlStrings.GetString(Tables.Events, "GetNewEvents");
@@ -28,18 +38,19 @@ namespace DataStorage.DataProviders
             return result;
         }
 
-        public static IList<EventDTO> AddEvent(string type, string description, string organizer, string subscriber)
+        public static string AddEvent(string type, string description, string organizer, string subscriber)
         {
             string sqlQuery = XmlStrings.GetString(Tables.Events, "AddEvent");
-            SqlParameter param1 = new SqlParameter("@id", Guid.NewGuid());
+            string id = Guid.NewGuid().ToString();
+            SqlParameter param1 = new SqlParameter("@id", id);
             SqlParameter param2 = new SqlParameter("@type", type);
             SqlParameter param3 = new SqlParameter("@description", description);
             SqlParameter param4 = new SqlParameter("@organizer", organizer);
             SqlParameter param5 = new SqlParameter("subscriber", subscriber);
-            var result = DBHelper.GetData(
+            DBHelper.GetData(
                 new EventDTOMapper(),
                 sqlQuery, param1, param2, param3, param4, param5);
-            return result;
+            return id;
         }
 
         public static IList<EventDTO> AddEvents(string events)
@@ -59,6 +70,13 @@ namespace DataStorage.DataProviders
                 new EventDTOMapper(),
                 sqlQuery, param);
             return result;
+        }
+        public static void DeleteTestEvents()
+        {
+            string sqlQuery = XmlStrings.GetString(Tables.Events, "DeleteTestEvents");
+            DBHelper.GetData(
+            new EventDTOMapper(),
+            sqlQuery);
         }
     }
 }
