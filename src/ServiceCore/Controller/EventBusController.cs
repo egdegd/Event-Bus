@@ -379,6 +379,11 @@ namespace WebAPI.Core.Controller
         {
             try
             {
+                if (string.IsNullOrEmpty(name))
+                {
+                    return Request.CreateResponse(HttpStatusCode.NotFound,
+                        "no new events", new MediaTypeHeaderValue("text/json"));
+                }
                 var events = EventDataProvider.GetNewEvents(name);
                 if (events.Count == 0)
                 {

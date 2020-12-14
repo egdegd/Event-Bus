@@ -1,0 +1,23 @@
+﻿<Window x:Class="ClientApp.MainWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        Title="NetworkComms .Net WPF Chat Example" Height="341" Width="512" Background="#FF7CA0FF" ResizeMode="CanMinimize">
+    <Grid>
+        <TextBox Height="231" HorizontalAlignment="Left" Margin="11,38,0,0" Name="chatBox" VerticalAlignment="Top" Width="356" IsReadOnly="True" VerticalScrollBarVisibility="Visible" TextWrapping="Wrap" />
+        <Label Content="Service Name:" Height="28" HorizontalAlignment="Left" Margin="83,9,0,0" Name="label4" VerticalAlignment="Top" />
+        <TextBox Height="22" HorizontalAlignment="Left" Margin="173,12,0,0" Name="localName" VerticalAlignment="Top" Width="130" TextChanged="localName_TextChanged"/>
+        <Label Content="Message:" Height="28" HorizontalAlignment="Left" Margin="5,272,0,0" Name="label5" VerticalAlignment="Top" />
+        <TextBox Height="23" HorizontalAlignment="Left" Margin="62,274,0,0" Name="messageText" VerticalAlignment="Top" Width="305" TextChanged="messageText_TextChanged" />
+        <Button Content="Send" Height="23" HorizontalAlignment="Left" Margin="373,274,0,0" Name="sendMessageButton" VerticalAlignment="Top" Width="117" Click="sendMessageButton_Click"/>
+        <CheckBox Content="" Height="16" HorizontalAlignment="Left" Margin="377,73,0,0" x:Name="flag1" VerticalAlignment="Top" Checked="flag1_Checked" Unchecked="flag1_Unchecked"/>
+        <CheckBox Content="" Height="16" HorizontalAlignment="Left" Margin="377,107,0,0" x:Name="flag2" VerticalAlignment="Top" Checked="flag2_Checked" Unchecked="flag2_Unchecked"/>
+        <CheckBox Content="" Height="16" HorizontalAlignment="Left" Margin="377,142,0,0" x:Name="flag3" VerticalAlignment="Top" Checked="flag3_Checked" Unchecked="flag3_Unchecked"/>
+        <CheckBox Content="" Height="16" HorizontalAlignment="Left" Margin="377,177,0,0" x:Name="flag4" VerticalAlignment="Top" Checked="flag4_Checked" Unchecked="flag4_Unchecked"/>
+        <TextBox HorizontalAlignment="Left" Margin="648,297,0,0" Text="TextBox" TextWrapping="Wrap" VerticalAlignment="Top" Width="120"/>
+        <TextBox Height="20" HorizontalAlignment="Left" Margin="395,70,0,0" x:Name="serviceName1" VerticalAlignment="Top" Width="100" />
+        <TextBox Height="20" HorizontalAlignment="Left" Margin="395,105,0,0" x:Name="serviceName2" VerticalAlignment="Top" Width="100" />
+        <TextBox Height="20" HorizontalAlignment="Left" Margin="395,140,0,0" x:Name="serviceName3" VerticalAlignment="Top" Width="100" />
+        <TextBox Height="20" HorizontalAlignment="Left" Margin="395,175,0,0" x:Name="serviceName4" VerticalAlignment="Top" Width="100" />
+        <Label Content="Subscriptions:" Height="28" HorizontalAlignment="Left" Margin="401,38,0,0" x:Name="label6" VerticalAlignment="Top" />
+    </Grid>
+</Window>
