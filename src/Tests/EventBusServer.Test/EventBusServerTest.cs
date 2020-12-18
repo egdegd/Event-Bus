@@ -83,6 +83,74 @@ namespace EventBusServer.Test
             }
         }
 
+        [TestMethod]
+        public void SendMessage()
+        {
+            var client = new HttpClient();
+            Message msg = new Message
+            {
+                From = "TestServiceA",
+                To = "TestServiceB",
+                Text = "TestText"
+            };
+
+            var serializedObject = JsonConvert.SerializeObject(msg);
+            var content = new StringContent(serializedObject, Encoding.UTF8, "application/json");
+            var response = client.PostAsync("http://localhost:9000/api/eventbus/addmsgindb", content).Result;
+            response = client.GetAsync("http://localhost:9000/api/eventbus/sendmsg?name=TestServiceB").Result;
+            var result = response.Content.ReadAsStringAsync().Result;
+            Message actualResultFromGet = JsonConvert.DeserializeObject<Message>(result);
+            Assert.AreEqual(actualResultFromGet.Text, "TestText");
+            Assert.AreEqual(actualResultFromGet.From, "TestServiceA");
+
+        }
+
+        [TestMethod]
+        public void SendNoNewMessage()
+        {
+            var client = new HttpClient();
+            var response = client.GetAsync("http://localhost:9000/api/eventbus/sendmsg?name=TestServiceB").Result;
+            var result = response.Content.ReadAsStringAsync().Result;
+            Assert.AreEqual(result, "\"no new messages\"");
+
+        }
+
+        [TestMethod]
+        public void Subscribe()
+        {
+            var client = new HttpClient();
+
+            Pair p = new Pair
+            {
+                First = "TestServiceA",
+                Second = "TestType"
+            };
+            var serializedObject = JsonConvert.SerializeObject(p);
+            var content = new StringContent(serializedObject, Encoding.UTF8, "application/json");
+            var response = client.PostAsync("http://localhost:9000/api/eventbus/subscribe", content).Result;
+            var result = response.Content.ReadAsStringAsync().Result;
+            Assert.AreEqual(result, "\"Subscription completed successfully!\"");
+
+        }
+
+        [TestMethod]
+        public void Unsubscribe()
+        {
+            var client = new HttpClient();
+
+            Pair p = new Pair
+            {
+                First = "TestServiceA",
+                Second = "TestType"
+            };
+            var serializedObject = JsonConvert.SerializeObject(p);
+            var content = new StringContent(serializedObject, Encoding.UTF8, "application/json");
+            var response = client.PostAsync("http://localhost:9000/api/eventbus/unsubscribe", content).Result;
+            var result = response.Content.ReadAsStringAsync().Result;
+            Assert.AreEqual(result, "\"Subscription deleted successfully!\"");
+
+        }
+
         [TestCleanup]
         public void TestCleanup()
         {

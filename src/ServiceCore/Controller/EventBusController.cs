@@ -254,6 +254,19 @@ namespace WebAPI.Core.Controller
 
         }
 
+        [Route("addmsgindb")]
+        [HttpPost]
+        public HttpResponseMessage AddMsgInDB([FromBody] Message msg)
+        {
+            if (msg == null)
+                return Request.CreateResponse(HttpStatusCode.InternalServerError,
+                    $"Given message is invalid", new MediaTypeHeaderValue("text/json"));
+            Console.WriteLine($"add msg from {msg.From} to {msg.To} with text {msg.Text} in data base");
+            MessageDataProvider.AddMessage(msg.From, msg.To, msg.Text);
+            return Request.CreateResponse(HttpStatusCode.OK, "Message added successfully", new MediaTypeHeaderValue("text/json"));
+
+        }
+
         public void AddMsgInList(Message msg)
         {
             try
