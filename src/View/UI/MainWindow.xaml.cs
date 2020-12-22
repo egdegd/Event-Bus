@@ -26,6 +26,7 @@ namespace ClientApp
     {
         string curMessage = "";
         string name = "";
+
         public MainWindow()
         {
             InitializeComponent();
@@ -48,10 +49,12 @@ namespace ClientApp
                 }
             }
         }
+
         private async void RequestMsgAsync()
         {
             await Task.Run(() => RequestMsg());
         }
+
         private void sendMessageButton_Click(object sender, RoutedEventArgs e)
         {
             if (!string.IsNullOrEmpty(curMessage))
@@ -77,6 +80,7 @@ namespace ClientApp
             TextBox textBox = (TextBox)sender;
             curMessage = textBox.Text;
         }
+
         private void flag1_Checked(object sender, RoutedEventArgs e)
         {
             var client = new HttpClient();
@@ -89,6 +93,7 @@ namespace ClientApp
             var content = new StringContent(serializedObject, Encoding.UTF8, "application/json");
             var response = client.PostAsync("http://localhost:9000/api/eventbus/subscribe", content).Result;
         }
+
         private void flag1_Unchecked(object sender, RoutedEventArgs e)
         {
             var client = new HttpClient();
@@ -101,6 +106,7 @@ namespace ClientApp
             var content = new StringContent(serializedObject, Encoding.UTF8, "application/json");
             var response = client.PostAsync("http://localhost:9000/api/eventbus/unsubscribe", content).Result;
         }
+
         private void flag2_Checked(object sender, RoutedEventArgs e)
         {
             var client = new HttpClient();
@@ -113,6 +119,7 @@ namespace ClientApp
             var content = new StringContent(serializedObject, Encoding.UTF8, "application/json");
             var response = client.PostAsync("http://localhost:9000/api/eventbus/subscribe", content).Result;
         }
+
         private void flag2_Unchecked(object sender, RoutedEventArgs e)
         {
             var client = new HttpClient();
@@ -125,6 +132,7 @@ namespace ClientApp
             var content = new StringContent(serializedObject, Encoding.UTF8, "application/json");
             var response = client.PostAsync("http://localhost:9000/api/eventbus/unsubscribe", content).Result;
         }
+
         private void flag3_Checked(object sender, RoutedEventArgs e)
         {
             var client = new HttpClient();
@@ -137,6 +145,7 @@ namespace ClientApp
             var content = new StringContent(serializedObject, Encoding.UTF8, "application/json");
             var response = client.PostAsync("http://localhost:9000/api/eventbus/subscribe", content).Result;
         }
+
         private void flag3_Unchecked(object sender, RoutedEventArgs e)
         {
             var client = new HttpClient();
@@ -149,6 +158,7 @@ namespace ClientApp
             var content = new StringContent(serializedObject, Encoding.UTF8, "application/json");
             var response = client.PostAsync("http://localhost:9000/api/eventbus/unsubscribe", content).Result;
         }
+
         private void flag4_Checked(object sender, RoutedEventArgs e)
         {
             var client = new HttpClient();
@@ -161,6 +171,7 @@ namespace ClientApp
             var content = new StringContent(serializedObject, Encoding.UTF8, "application/json");
             var response = client.PostAsync("http://localhost:9000/api/eventbus/subscribe", content).Result;
         }
+
         private void flag4_Unchecked(object sender, RoutedEventArgs e)
         {
             var client = new HttpClient();

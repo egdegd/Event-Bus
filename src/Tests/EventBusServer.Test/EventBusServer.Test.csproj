@@ -16,7 +16,8 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\..\ConsoleHost\ConsoleHost.csproj" />
+    <ProjectReference Include="..\..\DAL\DataStorage\DataStorage.csproj" />
+    <ProjectReference Include="..\..\DAL\Model\Model.csproj" />
   </ItemGroup>
 
 </Project>

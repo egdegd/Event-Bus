@@ -61,11 +61,7 @@
     <None Include="packages.config" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\..\DataStorage\DataStorage.csproj">
-      <Project>{e7b544e6-4788-4b53-bd0a-f61d531bff9e}</Project>
-      <Name>DataStorage</Name>
-    </ProjectReference>
-    <ProjectReference Include="..\..\Model\Model.csproj">
+    <ProjectReference Include="..\..\DAL\Model\Model.csproj">
       <Project>{419577ad-11f2-4dac-8a36-a8ed223ceead}</Project>
       <Name>Model</Name>
     </ProjectReference>
