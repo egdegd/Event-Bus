@@ -2,7 +2,6 @@
 using System.Collections.Generic;
 using System.Data.SqlClient;
 using DataStorage.Mappers;
-using Log;
 using Model;
 using SqlHelper;
 
@@ -69,12 +68,15 @@ namespace DataStorage.DataProviders
                 sqlQuery, param);
             return result;
         }
-        public static void DeleteTestMessages()
+        public static void DeleteMessagesFor(string recipient, int start, int finish)
         {
-            string sqlQuery = XmlStrings.GetString(Tables.Messages, "DeleteTestMessages");
+            string sqlQuery = XmlStrings.GetString(Tables.Messages, "DeleteMessagesFor");
+            SqlParameter param1 = new SqlParameter("@recipient", recipient);
+            SqlParameter param2 = new SqlParameter("@start", start);
+            SqlParameter param3 = new SqlParameter("@finish", finish);
             DBHelper.GetData(
             new MessageDTOMapper(),
-            sqlQuery);
+            sqlQuery, param1, param2, param3);
         }
     }
 }

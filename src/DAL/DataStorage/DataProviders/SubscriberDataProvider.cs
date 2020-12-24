@@ -38,12 +38,15 @@ namespace DataStorage.DataProviders
                 sqlQuery, param1, param2);
             return result;
         }
-        public static void DeleteTestSubscribers()
+        public static void DeleteSubscribers(string subscriber, int start, int finish)
         {
-            string sqlQuery = XmlStrings.GetString(Tables.Subscribers, "DeleteTestSubscribers");
+            string sqlQuery = XmlStrings.GetString(Tables.Subscribers, "DeleteSubscribers");
+            SqlParameter param1 = new SqlParameter("@subscriber", subscriber);
+            SqlParameter param2 = new SqlParameter("@start", start);
+            SqlParameter param3 = new SqlParameter("@finish", finish);
             DBHelper.GetData(
             new SubscriberDTOMapper(),
-            sqlQuery);
+            sqlQuery, param1, param2, param3);
         }
     }
 }

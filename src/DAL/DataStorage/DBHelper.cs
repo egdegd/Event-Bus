@@ -4,8 +4,8 @@ using System.Configuration;
 using System.Data;
 using System.Data.SqlClient;
 using DataStorage.Mappers;
-using Log;
 using Model;
+using Utils;
 
 namespace DataStorage
 {

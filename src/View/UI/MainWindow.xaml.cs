@@ -16,6 +16,7 @@ using System.Windows.Navigation;
 using System.Windows.Shapes;
 using Newtonsoft.Json;
 using Model;
+using WebServiceClient;
 
 namespace ClientApp
 {
@@ -26,6 +27,7 @@ namespace ClientApp
     {
         string curMessage = "";
         string name = "";
+        static readonly EventBusClient client = new EventBusClient();
 
         public MainWindow()
         {
@@ -35,16 +37,18 @@ namespace ClientApp
 
         private void RequestMsg()
         {
-            var client = new HttpClient();
             while (true)
             {
                 Thread.Sleep(1000);
-                var response = client.GetAsync("http://localhost:9000/api/eventbus/sendevent?name=" + name).Result;
-                var result = response.Content.ReadAsStringAsync().Result;
+                var result = client.SendEvent(name);
+
                 if (result != "\"no new events\"")
                 {
-                    Event actualResultFromGet = JsonConvert.DeserializeObject<Event>(result);
-                    Dispatcher.Invoke(() => chatBox.AppendText(actualResultFromGet.Organizer + ": " + actualResultFromGet.Description + "\n"));
+                    List<Event> actualResultFromGet = JsonConvert.DeserializeObject<List<Event>>(result);
+                    foreach (Event e in actualResultFromGet)
+                    {
+                        Dispatcher.Invoke(() => chatBox.AppendText(e.Organizer + ": " + e.Description + "\n"));
+                    }
 
                 }
             }
@@ -59,18 +63,7 @@ namespace ClientApp
         {
             if (!string.IsNullOrEmpty(curMessage))
             {
-                var client = new HttpClient();
-                Event evnt = new Event
-                {
-                    Type = name,
-                    Description = curMessage,
-                    Organizer = name
-                };
-
-                var serializedObject = JsonConvert.SerializeObject(evnt);
-                var content = new StringContent(serializedObject, Encoding.UTF8, "application/json");
-                var response = client.PostAsync("http://localhost:9000/api/eventbus/publish", content).Result;
-                //chatBox.AppendText(curMessage + "\n");
+                client.Publish(name, name, curMessage);
                 messageText.Clear();
             }
         }
@@ -83,106 +76,42 @@ namespace ClientApp
 
         private void flag1_Checked(object sender, RoutedEventArgs e)
         {
-            var client = new HttpClient();
-            Pair p = new Pair
-            {
-                First = name,
-                Second = serviceName1.Text
-            };
-            var serializedObject = JsonConvert.SerializeObject(p);
-            var content = new StringContent(serializedObject, Encoding.UTF8, "application/json");
-            var response = client.PostAsync("http://localhost:9000/api/eventbus/subscribe", content).Result;
+            client.Subscribe(name, serviceName1.Text);
         }
 
         private void flag1_Unchecked(object sender, RoutedEventArgs e)
         {
-            var client = new HttpClient();
-            Pair p = new Pair
-            {
-                First = name,
-                Second = serviceName1.Text
-            };
-            var serializedObject = JsonConvert.SerializeObject(p);
-            var content = new StringContent(serializedObject, Encoding.UTF8, "application/json");
-            var response = client.PostAsync("http://localhost:9000/api/eventbus/unsubscribe", content).Result;
+            client.Unsubscribe(name, serviceName1.Text);
         }
 
         private void flag2_Checked(object sender, RoutedEventArgs e)
         {
-            var client = new HttpClient();
-            Pair p = new Pair
-            {
-                First = name,
-                Second = serviceName2.Text
-            };
-            var serializedObject = JsonConvert.SerializeObject(p);
-            var content = new StringContent(serializedObject, Encoding.UTF8, "application/json");
-            var response = client.PostAsync("http://localhost:9000/api/eventbus/subscribe", content).Result;
+            client.Subscribe(name, serviceName2.Text);
         }
 
         private void flag2_Unchecked(object sender, RoutedEventArgs e)
         {
-            var client = new HttpClient();
-            Pair p = new Pair
-            {
-                First = name,
-                Second = serviceName2.Text
-            };
-            var serializedObject = JsonConvert.SerializeObject(p);
-            var content = new StringContent(serializedObject, Encoding.UTF8, "application/json");
-            var response = client.PostAsync("http://localhost:9000/api/eventbus/unsubscribe", content).Result;
+            client.Unsubscribe(name, serviceName2.Text);
         }
 
         private void flag3_Checked(object sender, RoutedEventArgs e)
         {
-            var client = new HttpClient();
-            Pair p = new Pair
-            {
-                First = name,
-                Second = serviceName3.Text
-            };
-            var serializedObject = JsonConvert.SerializeObject(p);
-            var content = new StringContent(serializedObject, Encoding.UTF8, "application/json");
-            var response = client.PostAsync("http://localhost:9000/api/eventbus/subscribe", content).Result;
+            client.Subscribe(name, serviceName3.Text);
         }
 
         private void flag3_Unchecked(object sender, RoutedEventArgs e)
         {
-            var client = new HttpClient();
-            Pair p = new Pair
-            {
-                First = name,
-                Second = serviceName3.Text
-            };
-            var serializedObject = JsonConvert.SerializeObject(p);
-            var content = new StringContent(serializedObject, Encoding.UTF8, "application/json");
-            var response = client.PostAsync("http://localhost:9000/api/eventbus/unsubscribe", content).Result;
+            client.Unsubscribe(name, serviceName3.Text);
         }
 
         private void flag4_Checked(object sender, RoutedEventArgs e)
         {
-            var client = new HttpClient();
-            Pair p = new Pair
-            {
-                First = name,
-                Second = serviceName4.Text
-            };
-            var serializedObject = JsonConvert.SerializeObject(p);
-            var content = new StringContent(serializedObject, Encoding.UTF8, "application/json");
-            var response = client.PostAsync("http://localhost:9000/api/eventbus/subscribe", content).Result;
+            client.Subscribe(name, serviceName4.Text);
         }
 
         private void flag4_Unchecked(object sender, RoutedEventArgs e)
         {
-            var client = new HttpClient();
-            Pair p = new Pair
-            {
-                First = name,
-                Second = serviceName4.Text
-            };
-            var serializedObject = JsonConvert.SerializeObject(p);
-            var content = new StringContent(serializedObject, Encoding.UTF8, "application/json");
-            var response = client.PostAsync("http://localhost:9000/api/eventbus/unsubscribe", content).Result;
+            client.Unsubscribe(name, serviceName4.Text);
         }
 
         private void localName_TextChanged(object sender, TextChangedEventArgs e)

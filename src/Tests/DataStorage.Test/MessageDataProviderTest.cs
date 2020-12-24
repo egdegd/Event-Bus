@@ -76,7 +76,7 @@ namespace DataStorage.Test
         [TestCleanup]
         public void TestCleanup()
         {
-            MessageDataProvider.DeleteTestMessages();
+            MessageDataProvider.DeleteMessagesFor("Test", 1, 4);
         }
 
     }

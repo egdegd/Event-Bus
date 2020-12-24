@@ -61,7 +61,7 @@ namespace DataStorage.Test
         [TestCleanup]
         public void TestCleanup()
         {
-            SubscriberDataProvider.DeleteTestSubscribers();
+            SubscriberDataProvider.DeleteSubscribers("Test", 1, 4);
         }
 
     }

@@ -85,7 +85,7 @@
       <Project>{419577ad-11f2-4dac-8a36-a8ed223ceead}</Project>
       <Name>Model</Name>
     </ProjectReference>
-    <ProjectReference Include="..\ServiceCore\ServiceCore.csproj">
+    <ProjectReference Include="..\EventBusCore\EventBusCore.csproj">
       <Project>{058ce257-dd36-4420-bc30-0e871a8529cb}</Project>
       <Name>ServiceCore</Name>
     </ProjectReference>

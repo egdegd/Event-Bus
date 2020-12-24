@@ -1,6 +1,5 @@
 ﻿using Microsoft.Owin.Hosting;
 using System;
-using Log;
 using WebAPI.Core.Controller;
 using System.Threading;
 using System.Net.Http;
@@ -15,16 +14,6 @@ namespace WebAPI.SelfHost
             string localhost = Console.ReadLine();
             Console.WriteLine("Service name:");
             string name = Console.ReadLine();
-            //string localhost = "9000";
-            //string name = "eventBus";
-            if (name == "eventBus")
-            {
-                EventBusController.init();
-                Thread t1 = new Thread(EventBusController.MessagesWatchDog);
-                t1.Start();
-                Thread t2 = new Thread(EventBusController.EventsWatchDog);
-                t2.Start();
-            }
            
             string baseAddress = "http://localhost:" + localhost + "/";
             using (WebApp.Start<Startup>(url: baseAddress))

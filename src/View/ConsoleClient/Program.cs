@@ -4,7 +4,6 @@ using System.Net.Http;
 using Newtonsoft.Json;
 using Model;
 using System.Threading.Tasks;
-using Log;
 
 namespace View
 {

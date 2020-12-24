@@ -71,12 +71,15 @@ namespace DataStorage.DataProviders
                 sqlQuery, param);
             return result;
         }
-        public static void DeleteTestEvents()
+        public static void DeleteEventsFor(string subscriber, int start, int finish)
         {
-            string sqlQuery = XmlStrings.GetString(Tables.Events, "DeleteTestEvents");
+            string sqlQuery = XmlStrings.GetString(Tables.Events, "DeleteEventsFor");
+            SqlParameter param1 = new SqlParameter("@subscriber", subscriber);
+            SqlParameter param2 = new SqlParameter("@start", start);
+            SqlParameter param3 = new SqlParameter("@finish", finish);
             DBHelper.GetData(
             new EventDTOMapper(),
-            sqlQuery);
+            sqlQuery, param1, param2, param3);
         }
     }
 }

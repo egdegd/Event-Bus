@@ -7,11 +7,11 @@ using System.Collections.Generic;
 using Model;
 using System;
 using DataStorage.DataProviders;
-using Log;
 using System.IO;
 using System.Text.Json;
 using System.Text.Json.Serialization;
 using System.Threading;
+using Utils;
 
 namespace WebAPI.Core.Controller
 {
@@ -27,6 +27,7 @@ namespace WebAPI.Core.Controller
         static object[] msgLocks = new object[concurrencyLevel];
         static readonly List<EventToFile>[] eventsToWrite = new List<EventToFile>[concurrencyLevel];
         static object[] eventsLocks = new object[concurrencyLevel];
+        static AutoResetEvent autoEvent = new AutoResetEvent(false);
 
 
         public static void init()
@@ -100,9 +101,10 @@ namespace WebAPI.Core.Controller
                         while (Interlocked.CompareExchange(ref countOfThreads, concurrencyLevel, concurrencyLevel) >= concurrencyLevel)
                             spinWait.SpinOnce();
                         filesForMessages.Add(file);
-                        Thread t = new Thread(() => SaveMessagesInDataBase(file));
+                        //Thread t = new Thread(() => SaveMessagesInDataBase(file));
+                        ThreadPool.QueueUserWorkItem(state => SaveMessagesInDataBase(file));
                         Logger.Info($"created new thread for file: {file}");
-                        t.Start();
+                        //t.Start();
                     }
                 }
             }
@@ -124,9 +126,10 @@ namespace WebAPI.Core.Controller
                         while (Interlocked.CompareExchange(ref countOfThreads, concurrencyLevel, concurrencyLevel) >= concurrencyLevel)
                             spinWait.SpinOnce();
                         filesForEvents.Add(file);
-                        Thread t = new Thread(() => SaveEventsInDataBase(file));
+                        ThreadPool.QueueUserWorkItem(state => SaveEventsInDataBase(file));
+                        //Thread t = new Thread(() => SaveEventsInDataBase(file));
                         Logger.Info($"created new thread for file: {file}");
-                        t.Start();
+                        //t.Start();
                     }
                 }
             }
@@ -137,7 +140,7 @@ namespace WebAPI.Core.Controller
             Interlocked.Increment(ref countOfThreads);
             //Random r = new Random();
             //int rInt = r.Next(1000, 10000);
-            //Thread.Sleep(rInt);
+            //Thread.Sleep(5000);
             string[] lines = File.ReadAllLines(filename);
             string msgsToDB = "";
             foreach (string s in lines)
@@ -159,8 +162,10 @@ namespace WebAPI.Core.Controller
                 Logger.Error("EventBus error", e);
                 throw;
             }
-            
-            Interlocked.Decrement(ref countOfThreads);
+            finally
+            {
+                Interlocked.Decrement(ref countOfThreads);
+            }
         }
 
         public static void SaveEventsInDataBase(string filename)
@@ -187,8 +192,11 @@ namespace WebAPI.Core.Controller
                 Logger.Error("EventBus error", e);
                 throw;
             }
-           
-            Interlocked.Decrement(ref countOfThreads);
+            finally
+            {
+                Interlocked.Decrement(ref countOfThreads);
+            }
+
 
         }
 
@@ -196,46 +204,96 @@ namespace WebAPI.Core.Controller
         [HttpGet]
         public HttpResponseMessage SendMsg(string name)
         {
-            HttpResponseMessage result = null;
-            SpinWait spinWait = new SpinWait();
-            while (Interlocked.CompareExchange(ref countOfThreads, concurrencyLevel, concurrencyLevel) >= concurrencyLevel)
-                spinWait.SpinOnce();
-            Thread t = new Thread(() => { result = SendMsgThread(name); });
-            t.Start();
-            t.Join();
-            //TODO return good response
-            return result;
-        }
-
-        public HttpResponseMessage SendMsgThread(string name)
-        {
-            Interlocked.Increment(ref countOfThreads);
             try
             {
-                var messages = MessageDataProvider.GetNewMessages(name);
-                if (messages.Count == 0)
+                if (string.IsNullOrEmpty(name))
                 {
-                    Interlocked.Decrement(ref countOfThreads);
-                    //return "no new messages";
                     return Request.CreateResponse(HttpStatusCode.NotFound,
                         "no new messages", new MediaTypeHeaderValue("text/json"));
                 }
 
-                Message msg = messages[0].ToMessage();
-                Console.WriteLine($"eventBus sent message from {msg.From} to {msg.To} with text: \"{msg.Text}\"");
-                var response = Request.CreateResponse<Message>(HttpStatusCode.Accepted, msg);
-                MessageDataProvider.UpdateIsSent(messages[0].Id);
-                Logger.Info($"Status of the message {messages[0].Id} has been updated");
-                Interlocked.Decrement(ref countOfThreads);
+                IList<MessageDTO> messages = MessageDataProvider.GetNewMessages(name);
+
+                if (messages.Count == 0)
+                {
+                    return Request.CreateResponse(HttpStatusCode.NotFound,
+                        "no new messages", new MediaTypeHeaderValue("text/json"));
+                }
+
+                List<Message> msgsToResponse = new List<Message>();
+                
+                foreach (MessageDTO msg in messages)
+                {
+                    msgsToResponse.Add(msg.ToMessage());
+                }
+
+                foreach (Message msg in msgsToResponse)
+                {
+                    Console.WriteLine($"eventBus sent message from {msg.From} to {msg.To} with text: \"{msg.Text}\"");
+                }
+
+                var response = Request.CreateResponse<List<Message>>(HttpStatusCode.Accepted, msgsToResponse);
+                
+                foreach (MessageDTO msg in messages)
+                {
+                    MessageDataProvider.UpdateIsSent(msg.Id);
+                    Logger.Info($"Status of the message {msg.Id} has been updated");
+                }
+
                 return response;
             }
             catch (Exception e)
             {
                 Logger.Error("EventBus error", e);
-                Interlocked.Decrement(ref countOfThreads);
                 throw;
             }
+
         }
+        //[Route("sendmsg")]
+        //[HttpGet]
+        //public HttpResponseMessage SendMsg(string name)
+        //{
+        //    HttpResponseMessage result = null;
+        //    SpinWait spinWait = new SpinWait();
+        //    while (Interlocked.CompareExchange(ref countOfThreads, concurrencyLevel, concurrencyLevel) >= concurrencyLevel)
+        //        spinWait.SpinOnce();
+        //    //Thread t = new Thread(() => { result = SendMsgThread(name); });
+        //    ThreadPool.QueueUserWorkItem(state => { result = SendMsgThread(name); });
+        //    autoEvent.WaitOne();
+        //    //t.Start();
+        //    //t.Join();
+        //    //TODO return good response
+        //    return result;
+        //}
+
+        //public HttpResponseMessage SendMsgThread(string name)
+        //{
+        //    Interlocked.Increment(ref countOfThreads);
+        //    try
+        //    {
+        //        var messages = MessageDataProvider.GetNewMessages(name);
+        //        if (messages.Count == 0)
+        //        {
+        //            Interlocked.Decrement(ref countOfThreads);
+        //            //return "no new messages";
+        //            return Request.CreateResponse(HttpStatusCode.NotFound,
+        //                "no new messages", new MediaTypeHeaderValue("text/json"));
+        //        }
+        //        Message msg = messages[0].ToMessage();
+        //        Console.WriteLine($"eventBus sent message from {msg.From} to {msg.To} with text: \"{msg.Text}\"");
+        //        var response = Request.CreateResponse<Message>(HttpStatusCode.Accepted, msg);
+        //        MessageDataProvider.UpdateIsSent(messages[0].Id);
+        //        Logger.Info($"Status of the message {messages[0].Id} has been updated");
+        //        Interlocked.Decrement(ref countOfThreads);
+        //        return response;
+        //    }
+        //    catch (Exception e)
+        //    {
+        //        Logger.Error("EventBus error", e);
+        //        Interlocked.Decrement(ref countOfThreads);
+        //        throw;
+        //    }
+        //}
 
         [Route("addmsg")]
         [HttpPost]
@@ -247,9 +305,10 @@ namespace WebAPI.Core.Controller
             SpinWait spinWait = new SpinWait();
             while (Interlocked.CompareExchange(ref countOfThreads, concurrencyLevel, concurrencyLevel) >= concurrencyLevel)
                 spinWait.SpinOnce();
-            Thread t = new Thread(() => AddMsgInList(msg));
+            //Thread t = new Thread(() => AddMsgInList(msg));
+            ThreadPool.QueueUserWorkItem(state => AddMsgInList(msg));
             Logger.Info($"created new thread for adding message from {msg.From} to {msg.To} with text: {msg.Text}");
-            t.Start();
+            //t.Start();
             return Request.CreateResponse(HttpStatusCode.OK, "Message added successfully", new MediaTypeHeaderValue("text/json"));
 
         }
@@ -304,9 +363,10 @@ namespace WebAPI.Core.Controller
             SpinWait spinWait = new SpinWait();
             while (Interlocked.CompareExchange(ref countOfThreads, concurrencyLevel, concurrencyLevel) >= concurrencyLevel)
                 spinWait.SpinOnce();
-            Thread t = new Thread(() => AddEventInList(e));
+            //Thread t = new Thread(() => AddEventInList(e));
+            ThreadPool.QueueUserWorkItem(state => AddEventInList(e));
             Logger.Info($"created new thread for adding event from {e.Organizer} with description: {e.Description}");
-            t.Start();
+            //t.Start();
             return Request.CreateResponse(HttpStatusCode.OK, "Event added successfully!", new MediaTypeHeaderValue("text/json"));
         }
 
@@ -388,7 +448,7 @@ namespace WebAPI.Core.Controller
 
         [Route("sendevent")]
         [HttpGet]
-        public HttpResponseMessage SendEvent(string name)
+        public HttpResponseMessage SendEvent(string name)   //TODO: add threading
         {
             try
             {
@@ -403,11 +463,25 @@ namespace WebAPI.Core.Controller
                     return Request.CreateResponse(HttpStatusCode.NotFound,
                         "no new events", new MediaTypeHeaderValue("text/json"));
                 }
-                Event e = events[0].ToEvent();
-                Console.WriteLine($"eventBus notified {name} about event from {e.Organizer} with description: \"{e.Description}\"");
-                var response = Request.CreateResponse<Event>(HttpStatusCode.Accepted, e);
-                EventDataProvider.UpdateIsSent(events[0].Id);
-                Logger.Info($"Status of the event {events[0].Id} has been updated");
+                List<Event> eventsToResponse = new List<Event>();
+                foreach (EventDTO e in events)
+                {
+                    eventsToResponse.Add(e.ToEvent());
+                }
+
+                foreach (Event e in eventsToResponse)
+                {
+                    Console.WriteLine($"eventBus notified {name} about event from {e.Organizer} with description: \"{e.Description}\"");
+                }
+
+                var response = Request.CreateResponse<List<Event>>(HttpStatusCode.Accepted, eventsToResponse);
+
+                foreach (EventDTO e in events)
+                {
+                    EventDataProvider.UpdateIsSent(e.Id);
+                    Logger.Info($"Status of the event {e.Id} has been updated");
+                }
+                
                 return response;
             }
             catch (Exception e)
@@ -422,7 +496,7 @@ namespace WebAPI.Core.Controller
         [HttpGet]
         public void DeleteTestMessages()
         {
-            MessageDataProvider.DeleteTestMessages();
+            MessageDataProvider.DeleteMessagesFor("Test", 1, 4);
         }
     }
 }

@@ -61,6 +61,10 @@
     <None Include="packages.config" />
   </ItemGroup>
   <ItemGroup>
+    <ProjectReference Include="..\..\Controller\WebServiceClient\WebServiceClient.csproj">
+      <Project>{44eb8f11-615d-4541-9aa6-287133c26ab8}</Project>
+      <Name>WebServiceClient</Name>
+    </ProjectReference>
     <ProjectReference Include="..\..\DAL\Model\Model.csproj">
       <Project>{419577ad-11f2-4dac-8a36-a8ed223ceead}</Project>
       <Name>Model</Name>

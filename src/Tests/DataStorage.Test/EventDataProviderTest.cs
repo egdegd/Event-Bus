@@ -81,7 +81,7 @@ namespace DataStorage.Test
         [TestCleanup]
         public void TestCleanup()
         {
-            EventDataProvider.DeleteTestEvents();
+            EventDataProvider.DeleteEventsFor("Test", 1, 4);
         }
 
     }

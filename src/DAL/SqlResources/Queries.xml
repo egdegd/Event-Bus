@@ -23,9 +23,9 @@
 			set isSent = 1
 			where Id = @id
 		</Command>
-		<Command Name="DeleteTestMessages">
+		<Command Name="DeleteMessagesFor">
 			delete from messages
-			where substring([From], 1, 4) = 'Test' and substring([To], 1, 4) = 'Test' and substring([Text], 1, 4) = 'Test'
+			where substring([To], @start, @finish) = @recipient
 		</Command>
 	</Table>
 	<Table Name="events">
@@ -50,10 +50,9 @@
 			set isSent = 1
 			where Id = @id
 		</Command>
-		<Command Name="DeleteTestEvents">
+		<Command Name="DeleteEventsFor">
 			delete from events
-			where substring([Type], 1, 4) = 'Test' and substring([Description], 1, 4) = 'Test'
-			and substring(Organizer, 1, 4) = 'Test' and substring(Subscriber, 1, 4) = 'Test'
+			where substring(Subscriber, @start, @finish) = @subscriber
 		</Command>
 	</Table>
 	<Table Name="subscribers">
@@ -69,9 +68,9 @@
 		<Command Name="DeleteSubscribe">
 			delete subscribers where Subscriber = @subscriber and [Type] = @type
 		</Command>
-		<Command Name="DeleteTestSubscribers">
+		<Command Name="DeleteSubscribers">
 			delete from subscribers
-			where substring(Subscriber, 1, 4) = 'Test' and substring([Type], 1, 4) = 'Test'
+			where substring(Subscriber, @start, @finish) = @subscriber
 		</Command>
 	</Table>
 </Root>
