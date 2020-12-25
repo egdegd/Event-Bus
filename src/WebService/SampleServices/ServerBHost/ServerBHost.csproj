@@ -4,7 +4,7 @@
   <PropertyGroup>
     <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
     <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
-    <ProjectGuid>{F197E5F2-395E-49C9-AC31-C575F486917B}</ProjectGuid>
+    <ProjectGuid>{EF8FAF10-D680-4965-9F4F-3245691B76B0}</ProjectGuid>
     <OutputType>Exe</OutputType>
     <AppDesignerFolder>Properties</AppDesignerFolder>
     <RootNamespace>WebAPI.SelfHost</RootNamespace>
@@ -81,13 +81,13 @@
     <None Include="packages.config" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\..\DAL\Model\Model.csproj">
+    <ProjectReference Include="..\..\..\DAL\Model\Model.csproj">
       <Project>{419577ad-11f2-4dac-8a36-a8ed223ceead}</Project>
       <Name>Model</Name>
     </ProjectReference>
-    <ProjectReference Include="..\SampleServerCore\SampleServerCore.csproj">
+    <ProjectReference Include="..\ServerBCore\ServerBCore.csproj">
       <Project>{2e42a7b4-8a5a-451c-ab78-69eecab4a003}</Project>
-      <Name>SampleServerCore</Name>
+      <Name>ServerBCore</Name>
     </ProjectReference>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />

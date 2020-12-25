@@ -18,6 +18,7 @@ namespace DataStorage.DataProviders
                 sqlQuery, param);
             return result;
         }
+
         public static IList<String> AddSubscribe(string subscriber, string type)
         {
             string sqlQuery = XmlStrings.GetString(Tables.Subscribers, "AddSubscribe");
@@ -28,6 +29,7 @@ namespace DataStorage.DataProviders
                 sqlQuery, param1, param2);
             return result;
         }
+
         public static IList<String> DeleteSubscribe(string subscriber, string type)
         {
             string sqlQuery = XmlStrings.GetString(Tables.Subscribers, "DeleteSubscribe");
@@ -38,6 +40,7 @@ namespace DataStorage.DataProviders
                 sqlQuery, param1, param2);
             return result;
         }
+
         public static void DeleteSubscribers(string subscriber, int start, int finish)
         {
             string sqlQuery = XmlStrings.GetString(Tables.Subscribers, "DeleteSubscribers");

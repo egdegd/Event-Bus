@@ -12,33 +12,25 @@ namespace View
     public class ConsoleClient
     {
         bool endApp = false;
-        SampleServiceClient client = new SampleServiceClient();
+        static readonly SampleServiceClient client = new SampleServiceClient();
 
-        static void RequestMsg()
+        static void RequestMsg(string localhost, string name)
         {
-            var client = new HttpClient();
             while (true)
             {
                 Thread.Sleep(1000);
-                var response = client.GetAsync("http://localhost:9001/api/serviceA/requestMsg").Result;
-                response = client.GetAsync("http://localhost:9001/api/serviceA/requestEvent").Result;
-                response = client.GetAsync("http://localhost:9002/api/serviceB/requestMsg").Result;
-                response = client.GetAsync("http://localhost:9002/api/serviceB/requestEvent").Result;
-                //response = client.GetAsync("http://localhost:9003/api/serviceC/requestMsg").Result;
-                //response = client.GetAsync("http://localhost:9003/api/serviceC/requestEvent").Result;
-                //response = client.GetAsync("http://localhost:9004/api/serviceD/requestMsg").Result;
-                //response = client.GetAsync("http://localhost:9004/api/serviceD/requestEvent").Result;
+                client.RequestMsg(localhost, name);
+                client.RequestEvent(localhost, name);
             }
         }
 
-        static async void RequestMsgAsync()
+        static async void RequestMsgAsync(string localhost, string name)
         {
-            await Task.Run(() => RequestMsg());
+            await Task.Run(() => RequestMsg(localhost, name));
         }
 
         public void Run()
         {
-            RequestMsgAsync();
             Help();
 
             while (!endApp)
@@ -46,6 +38,9 @@ namespace View
                 string cmd = Console.ReadLine();
                 switch (cmd)
                 {
+                    case "addService":
+                        AddService();
+                        break;
                     case "send":
                         SendMessage();
                         break;
@@ -72,10 +67,22 @@ namespace View
             }
         }
 
+        public void AddService()
+        {
+            Console.WriteLine("Localhost:");
+            string localhost = Console.ReadLine();
+
+            Console.WriteLine("Name:");
+            string name = Console.ReadLine();
+
+            RequestMsgAsync(localhost, name);
+        }
+
         public void Help()
         {
             Console.WriteLine("Choose a command from the following list:");
             Console.WriteLine("\thelp - show a list of commands on the screen");
+            Console.WriteLine("\taddService - add service");
             Console.WriteLine("\tsend - send message <text> from <senderName> to <receipientName>");
             Console.WriteLine("\tsubscribe - subscribe to event with type <eventType>");
             Console.WriteLine("\tunsubscribe - unsubscribe from event with type <eventType>");
@@ -98,21 +105,6 @@ namespace View
             Console.WriteLine("Recipient Name:");
             string toName = Console.ReadLine();
 
-            //var client = new HttpClient();
-            //string url = $"http://localhost:{localhost}/api/{fromName}/sendmsg?recipient={toName}&text={text}";
-            //string url = "http://localhost:" + localhost + "/api/" + fromName + "/sendmsg?recipient=" + toName + "&text=" + text;
-            //Logger.Info("Client sent request: " + url);
-
-            //try
-            //{
-            //    var response = client.GetAsync(url).Result;
-            //    var result = response.Content.ReadAsStringAsync().Result;
-            //    Logger.Info("Client received response: " + result);
-            //}
-            //catch (Exception e)
-            //{
-            //    Logger.Error("Request error", e);
-            //}
             try
             {
                 client.SendMessage(localhost, fromName, toName, text);
@@ -135,21 +127,6 @@ namespace View
             Console.WriteLine("Event type:");
             string type = Console.ReadLine();
 
-            //var client = new HttpClient();
-            //string url = $"http://localhost:{localhost}/api/{name}/subscribe?type={type}";
-            ////string url = "http://localhost:" + localhost + "/api/" + name + "/subscribe?type=" + type;
-            //Logger.Info("Client sent request: " + url);
-
-            //try
-            //{
-            //    var response = client.GetAsync(url).Result;
-            //    var result = response.Content.ReadAsStringAsync().Result;
-            //    Logger.Info("Client received response: " + result);
-            //}
-            //catch (Exception e)
-            //{
-            //    Logger.Error("Request error", e);
-            //}
             try
             {
                 client.Subscribe(localhost, name, type);
@@ -172,22 +149,6 @@ namespace View
             Console.WriteLine("Event type:");
             string type = Console.ReadLine();
 
-            //var client = new HttpClient();
-            //string url = $"http://localhost:{localhost}/api/{name}/unsubscribe?type={type}";
-
-            ////string url = "http://localhost:" + localhost + "/api/" + name + "/unsubscribe?type=" + type;
-
-            //Logger.Info("Client sent request: " + url);
-            //try
-            //{
-            //    var response = client.GetAsync(url).Result;
-            //    var result = response.Content.ReadAsStringAsync().Result;
-            //    Logger.Info("Client received response: " + result);
-            //}
-            //catch (Exception e)
-            //{
-            //    Logger.Error("Request error", e);
-            //}
             try
             {
                 client.Unsubscribe(localhost, name, type);
@@ -212,22 +173,6 @@ namespace View
             Console.WriteLine("Description:");
             string description = Console.ReadLine();
 
-            //var client = new HttpClient();
-            //string url = $"http://localhost:{localhost}/api/{name}/publishevent?type={type}&description={description}";
-            ////string url = "http://localhost:" + localhost + "/api/" + name + "/publishevent?type=" + type + "&description=" + description;
-
-            //Logger.Info("Client sent request: " + url);
-
-            //try
-            //{
-            //    var response = client.GetAsync(url).Result;
-            //    var result = response.Content.ReadAsStringAsync().Result;
-            //    Logger.Info("Client received response: " + result);
-            //}
-            //catch (Exception e)
-            //{
-            //    Logger.Error("Request error", e);
-            //}
             try
             {
                 client.Publish(localhost, name, type, description);
@@ -256,7 +201,6 @@ namespace View
         {
             var client = new HttpClient();
             string url = $"http://localhost:{localhost}/api/testService/sendmsg?messagesPerSecond={messagesPerSecond}&countOfSeconds={countOfSeconds}";
-            //string url = "http://localhost:" + localhost + "/api/testService/sendmsg?messagesPerSecond=" + messagesPerSecond + "&countOfSeconds=" + countOfSeconds;
             var response = client.GetAsync(url).Result;
             var result = response.Content.ReadAsStringAsync().Result;
         }

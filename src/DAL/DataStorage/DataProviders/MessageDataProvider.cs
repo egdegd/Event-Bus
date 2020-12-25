@@ -18,6 +18,7 @@ namespace DataStorage.DataProviders
                 sqlQuery);
             return result;
         }
+
         public static IList<MessageDTO> GetMessageById(string id)
         {
             string sqlQuery = XmlStrings.GetString(Tables.Messages, "GetMessageById");
@@ -27,6 +28,7 @@ namespace DataStorage.DataProviders
                 sqlQuery, param);
             return result;
         }
+
         public static IList<MessageDTO> GetNewMessages(string recipient)
         {
             string sqlQuery = XmlStrings.GetString(Tables.Messages, "GetNewMessages");
@@ -50,6 +52,7 @@ namespace DataStorage.DataProviders
                 sqlQuery, param1, param2, param3, param4);
             return id;
         }
+
         public static IList<MessageDTO> AddMessages(string messages)
         {
             string sqlQuery = XmlStrings.GetString(Tables.Messages, "AddMessages");
@@ -59,6 +62,7 @@ namespace DataStorage.DataProviders
                 sqlQuery);
             return result;
         }
+
         public static IList<MessageDTO> UpdateIsSent(string id)
         {
             string sqlQuery = XmlStrings.GetString(Tables.Messages, "UpdateIsSent");
@@ -68,6 +72,7 @@ namespace DataStorage.DataProviders
                 sqlQuery, param);
             return result;
         }
+
         public static void DeleteMessagesFor(string recipient, int start, int finish)
         {
             string sqlQuery = XmlStrings.GetString(Tables.Messages, "DeleteMessagesFor");

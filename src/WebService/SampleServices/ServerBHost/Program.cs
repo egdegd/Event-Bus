@@ -10,11 +10,9 @@ namespace WebAPI.SelfHost
     {
         static void Main(string[] args)
         {
-            Console.WriteLine("Choose localhost:");
-            string localhost = Console.ReadLine();
-            Console.WriteLine("Service name:");
-            string name = Console.ReadLine();
-           
+            string localhost = "9002";
+            string name = "serviceB";
+
             string baseAddress = "http://localhost:" + localhost + "/";
             using (WebApp.Start<Startup>(url: baseAddress))
             {

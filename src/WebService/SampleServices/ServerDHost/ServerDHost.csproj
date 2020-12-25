@@ -4,7 +4,7 @@
   <PropertyGroup>
     <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
     <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
-    <ProjectGuid>{4832D53B-E79C-40C8-A3BA-A74EC2710FA1}</ProjectGuid>
+    <ProjectGuid>{FB76FA26-8874-46C4-AD76-8036CB36E661}</ProjectGuid>
     <OutputType>Exe</OutputType>
     <AppDesignerFolder>Properties</AppDesignerFolder>
     <RootNamespace>WebAPI.SelfHost</RootNamespace>
@@ -81,13 +81,13 @@
     <None Include="packages.config" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\..\DAL\Model\Model.csproj">
+    <ProjectReference Include="..\..\..\DAL\Model\Model.csproj">
       <Project>{419577ad-11f2-4dac-8a36-a8ed223ceead}</Project>
       <Name>Model</Name>
     </ProjectReference>
-    <ProjectReference Include="..\EventBusCore\EventBusCore.csproj">
-      <Project>{058ce257-dd36-4420-bc30-0e871a8529cb}</Project>
-      <Name>EventBusCore</Name>
+    <ProjectReference Include="..\ServerDCore\ServerDCore.csproj">
+      <Project>{2e42a7b4-8a5a-451c-ab78-69eecab4a003}</Project>
+      <Name>ServerDCore</Name>
     </ProjectReference>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />

@@ -1,4 +1,4 @@
-﻿using System;
+﻿  using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Net.Http;
@@ -83,6 +83,40 @@ namespace WebServiceClient
 
                 var result = response.Content.ReadAsStringAsync().Result;
                 Logger.Info("Client received response: " + result);
+                return result;
+            }
+            catch (Exception e)
+            {
+                Logger.Error("Request error", e);
+                throw;
+            }
+        }
+
+        public string RequestMsg(string localhost, string name)
+        {
+            string url = $"http://localhost:{localhost}/api/{name}/requestMsg";
+
+            try
+            {
+                var response = client.GetAsync(url).Result;
+                var result = response.Content.ReadAsStringAsync().Result;
+                return result;
+            }
+            catch (Exception e)
+            {
+                Logger.Error("Request error", e);
+                throw;
+            }
+        }
+
+        public string RequestEvent(string localhost, string name)
+        {
+            string url = $"http://localhost:{localhost}/api/{name}/requestEvent";
+
+            try
+            {
+                var response = client.GetAsync(url).Result;
+                var result = response.Content.ReadAsStringAsync().Result;
                 return result;
             }
             catch (Exception e)

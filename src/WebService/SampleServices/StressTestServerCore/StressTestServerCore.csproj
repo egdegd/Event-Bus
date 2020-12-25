@@ -4,7 +4,7 @@
   <PropertyGroup>
     <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
     <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
-    <ProjectGuid>{058CE257-DD36-4420-BC30-0E871A8529CB}</ProjectGuid>
+    <ProjectGuid>{7C92FB71-0669-4DD6-9536-7D0DDCAB0061}</ProjectGuid>
     <OutputType>Library</OutputType>
     <AppDesignerFolder>Properties</AppDesignerFolder>
     <RootNamespace>WebAPI.Core</RootNamespace>
@@ -83,8 +83,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Config\WebApiConfig.cs" />
-    <Compile Include="Controller\EventBusControllerMessage.cs" />
-    <Compile Include="Controller\EventBusControllerEvent.cs" />
+    <Compile Include="Controller\TestServiceController.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>
@@ -92,17 +91,17 @@
     <None Include="packages.config" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\..\DAL\DataStorage\DataStorage.csproj">
+    <ProjectReference Include="..\..\..\Controller\WebServiceClient\WebServiceClient.csproj">
+      <Project>{44eb8f11-615d-4541-9aa6-287133c26ab8}</Project>
+      <Name>WebServiceClient</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\..\..\DAL\DataStorage\DataStorage.csproj">
       <Project>{e7b544e6-4788-4b53-bd0a-f61d531bff9e}</Project>
       <Name>DataStorage</Name>
     </ProjectReference>
-    <ProjectReference Include="..\..\DAL\Model\Model.csproj">
+    <ProjectReference Include="..\..\..\DAL\Model\Model.csproj">
       <Project>{419577ad-11f2-4dac-8a36-a8ed223ceead}</Project>
       <Name>Model</Name>
-    </ProjectReference>
-    <ProjectReference Include="..\..\Utils\Utils.csproj">
-      <Project>{E21F183B-BCE2-4BF7-8222-E6686D7BA6AA}</Project>
-      <Name>Utils</Name>
     </ProjectReference>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />

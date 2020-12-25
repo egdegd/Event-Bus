@@ -10,16 +10,11 @@ namespace WebAPI.SelfHost
     {
         static void Main(string[] args)
         {
-            string localhost = "9000";
-            string name = "eventBus";
-
-            EventBusController.Init();
-            Thread t1 = new Thread(EventBusController.MessagesWatchDog);
-            t1.Start();
-            Thread t2 = new Thread(EventBusController.EventsWatchDog);
-            t2.Start();
+            Console.WriteLine("Choose localhost:");
+            string localhost = Console.ReadLine();
+            string name = "StressTestService";
            
-            string baseAddress = $"http://localhost:{localhost}/";
+            string baseAddress = "http://localhost:" + localhost + "/";
             using (WebApp.Start<Startup>(url: baseAddress))
             {
                 Console.WriteLine(name + " started at " + baseAddress);

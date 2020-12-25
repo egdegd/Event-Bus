@@ -62,7 +62,7 @@ namespace WebAPI.Core.Controller
         [HttpGet]
         public HttpResponseMessage Publish(string type, string description)
         {
-            client.Publish("ServiceA", type, description);
+            client.Publish("serviceA", type, description);
             Console.WriteLine($"serviceA published event with description: \"{description}\"");
             return Request.CreateResponse(HttpStatusCode.OK, "Event is published!", new MediaTypeHeaderValue("text/json"));
         }

@@ -28,6 +28,7 @@ namespace DataStorage.DataProviders
                 sqlQuery, param);
             return result;
         }
+
         public static IList<EventDTO> GetNewEvents(string subscriber)
         {
             string sqlQuery = XmlStrings.GetString(Tables.Events, "GetNewEvents");
@@ -62,6 +63,7 @@ namespace DataStorage.DataProviders
                 sqlQuery);
             return result;
         }
+
         public static IList<EventDTO> UpdateIsSent(string id)
         {
             string sqlQuery = XmlStrings.GetString(Tables.Events, "UpdateIsSent");
@@ -71,6 +73,7 @@ namespace DataStorage.DataProviders
                 sqlQuery, param);
             return result;
         }
+
         public static void DeleteEventsFor(string subscriber, int start, int finish)
         {
             string sqlQuery = XmlStrings.GetString(Tables.Events, "DeleteEventsFor");
