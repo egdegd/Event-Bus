@@ -30,7 +30,6 @@ namespace WebAPI.Core.Controller
         public HttpResponseMessage RequestMsg()
         {
             var result = client.SendMessage("serviceB");
-            Console.WriteLine("Я тут");
             if (result != "\"no new messages\"")
             {
                 List<Message> actualResultFromGet = JsonConvert.DeserializeObject<List<Message>>(result);

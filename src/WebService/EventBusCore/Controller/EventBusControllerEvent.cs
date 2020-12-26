@@ -21,7 +21,7 @@ namespace WebAPI.Core.Controller
         static readonly List<EventToFile>[] eventsToWrite = new List<EventToFile>[concurrencyLevel];
         static readonly object[] eventsLocks = new object[concurrencyLevel];
 
-        public void WriteEvents(int index)
+        public void WriteEvents(int index)  
         {
             Guid filename = Guid.NewGuid();
             string path = Environment.CurrentDirectory + @"\events\" + filename + @".txt";
@@ -214,7 +214,7 @@ namespace WebAPI.Core.Controller
 
         [Route("sendevent")]
         [HttpGet]
-        public HttpResponseMessage SendEvent(string name)   //TODO: add threading
+        public HttpResponseMessage SendEvent(string name)
         {
             try
             {
@@ -258,7 +258,6 @@ namespace WebAPI.Core.Controller
                 Logger.Error("EventBus error", e);
                 throw;
             }
-
         }
     }
 }

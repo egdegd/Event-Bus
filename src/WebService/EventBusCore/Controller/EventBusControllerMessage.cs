@@ -89,9 +89,6 @@ namespace WebAPI.Core.Controller
         public static void SaveMessagesInDataBase(string filename) 
         {
             Interlocked.Increment(ref countOfThreads);
-            //Random r = new Random();
-            //int rInt = r.Next(1000, 10000);
-            //Thread.Sleep(5000);
             string[] lines = File.ReadAllLines(filename);
             string msgsToDB = "";
 
@@ -181,51 +178,6 @@ namespace WebAPI.Core.Controller
                 throw;
             }
         }
-        //[Route("sendmsg")]
-        //[HttpGet]
-        //public HttpResponseMessage SendMsg(string name)
-        //{
-        //    HttpResponseMessage result = null;
-        //    SpinWait spinWait = new SpinWait();
-        //    while (Interlocked.CompareExchange(ref countOfThreads, concurrencyLevel, concurrencyLevel) >= concurrencyLevel)
-        //        spinWait.SpinOnce();
-        //    //Thread t = new Thread(() => { result = SendMsgThread(name); });
-        //    ThreadPool.QueueUserWorkItem(state => { result = SendMsgThread(name); });
-        //    autoEvent.WaitOne();
-        //    //t.Start();
-        //    //t.Join();
-        //    //TODO return good response
-        //    return result;
-        //}
-
-        //public HttpResponseMessage SendMsgThread(string name)
-        //{
-        //    Interlocked.Increment(ref countOfThreads);
-        //    try
-        //    {
-        //        var messages = MessageDataProvider.GetNewMessages(name);
-        //        if (messages.Count == 0)
-        //        {
-        //            Interlocked.Decrement(ref countOfThreads);
-        //            //return "no new messages";
-        //            return Request.CreateResponse(HttpStatusCode.NotFound,
-        //                "no new messages", new MediaTypeHeaderValue("text/json"));
-        //        }
-        //        Message msg = messages[0].ToMessage();
-        //        Console.WriteLine($"eventBus sent message from {msg.From} to {msg.To} with text: \"{msg.Text}\"");
-        //        var response = Request.CreateResponse<Message>(HttpStatusCode.Accepted, msg);
-        //        MessageDataProvider.UpdateIsSent(messages[0].Id);
-        //        Logger.Info($"Status of the message {messages[0].Id} has been updated");
-        //        Interlocked.Decrement(ref countOfThreads);
-        //        return response;
-        //    }
-        //    catch (Exception e)
-        //    {
-        //        Logger.Error("EventBus error", e);
-        //        Interlocked.Decrement(ref countOfThreads);
-        //        throw;
-        //    }
-        //}
 
         [Route("addmsg")]
         [HttpPost]

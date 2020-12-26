@@ -100,8 +100,6 @@ namespace EventBusServer.Test
             MessageDataProvider.DeleteMessagesFor("Test", 1, 4);
             SubscriberDataProvider.DeleteSubscribers("Test", 1, 4);
             EventDataProvider.DeleteEventsFor("Test", 1, 4);
-            //var client = new HttpClient();
-            //client.GetAsync("http://localhost:9000/api/eventbus/deleteTestMessages");
         }
     }
 }
